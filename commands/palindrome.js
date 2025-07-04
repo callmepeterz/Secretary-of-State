@@ -4,7 +4,7 @@ const getPalindromes = require("../assets/palindromes.js");
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("palindromes")
-    .setDescription("Get the three palindrome numbers that add up to the given integer.")
+    .setDescription("Get the three palindrome numbers that add up to the given integer")
     .setNSFW(false)
     .addIntegerOption(
         new SlashCommandIntegerOption()
@@ -21,7 +21,7 @@ module.exports = {
         .setRequired(false)
     ),
     index: "Tool",
-    cooldown: 1000,
+    cooldown: 1500,
 
     /**
      * @param {ChatInputCommandInteraction} interaction 

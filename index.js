@@ -6,6 +6,7 @@ const path = require("node:path");
 const client = new Client({intents: [process.env.INTENTS]});
 
 client.commands = new Collection();
+client.cooldowns = new Collection();
 
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file=>file.endsWith(".js"));

@@ -14,7 +14,7 @@ module.exports = {
         .setMaxValue(20)
     ),
     index: "Test",
-    cooldown: 1000,
+    cooldown: 3000,
 
     /**
      * @param {ChatInputCommandInteraction} interaction 
