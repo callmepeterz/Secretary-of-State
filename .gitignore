@@ -128,3 +128,6 @@ package-lock.json
 # deployment
 dep
 assets/hangman/words_rand.txt
+
+# Gemini system prompt
+systemPrompt.txt

@@ -1,0 +1,96 @@
+const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ChatInputCommandInteraction, InteractionResponse } = require('discord.js');
+const https = require("node:https");
+const fs = require("node:fs");
+const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString();
+
+module.exports = {
+    data: new SlashCommandBuilder()
+    .setName("gemini")
+    .setDescription("Ask Gemini AI")
+    .setNSFW(false)
+    .addStringOption(
+        new SlashCommandStringOption()
+        .setName("question")
+        .setDescription("Ask Gemini AI.")
+        .setRequired(true)
+        .setMaxLength(1000)
+    )
+    .addAttachmentOption(
+        new SlashCommandAttachmentOption()
+        .setName("file")
+        .setDescription("Send your file to Gemini AI")
+        .setRequired(false)
+    )
+    .addStringOption(
+        new SlashCommandStringOption()
+        .setName("model")
+        .setDescription("Specify which model to use, default is Gemini 2.5 Flash")
+        .setRequired(false)
+        .addChoices(
+            {name: "Gemini 2.5 Flash", value: "gemini-2.5-flash"},
+            {name: "Gemini 2.5 Pro", value: "gemini-2.5-pro"}
+        )
+    )
+    .addNumberOption(
+        new SlashCommandNumberOption()
+        .setName("temperature")
+        .setDescription("Specify temperature for Gemini AI, default is 0.8")
+        .setRequired(false)
+        .setMinValue(0)
+        .setMaxValue(2)
+    ),
+    index: "Tool",
+    cooldown: 5000,
+
+    /**
+     * @param {ChatInputCommandInteraction} interaction 
+     * @param {InteractionResponse} deferred
+     */
+    async execute(interaction, deferred){
+        let attachment = interaction.options.getAttachment("file");
+        let contents = interaction.options.getString("question");
+        if(attachment){
+            let attachmentData = await getAttachment(attachment);
+            contents = [
+                {
+                    inlineData: {
+                        mimeType: attachment.contentType,
+                        data: attachmentData,
+                    },
+                },
+                {text: interaction.options.getString("question")}
+            ]
+        }
+        const response = await interaction.client.ai.models.generateContent({
+            model: interaction.options.getString("model") ?? "gemini-2.5-flash",
+            contents,
+            config: {
+                systemInstruction,
+                temperature:interaction.options.getNumber("temperature") ?? 0.8
+            }
+        });
+        deferred.edit(response.text.slice(0, 2000));
+    },
+};
+
+async function getAttachment(a){
+    return new Promise(resolve => {
+        let data = [];
+        let urlparts = a.url
+            .replace("https://", "")
+            .replace("http://", "")
+            .split("/");
+        let host = urlparts[0];
+        let p = "/" + urlparts.slice(1).join("/");
+
+        https.request({
+            hostname: host,
+            path: p,
+            method: "GET"
+        }, (res) => {
+            res.on("data", (chunk) => data.push(chunk));
+            res.on("end", () => resolve(Buffer.concat(data).toString("base64")));
+            res.on("error", (err) => console.error(err));
+        }).end();
+    });
+}

@@ -4,9 +4,11 @@ const {Client, Collection} = require('discord.js');
 const fs = require("node:fs");
 const path = require("node:path");
 const client = new Client({intents: [process.env.INTENTS]});
+const { GoogleGenAI } = require("@google/genai");
 
 client.commands = new Collection();
 client.cooldowns = new Collection();
+client.ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file=>file.endsWith(".js"));
