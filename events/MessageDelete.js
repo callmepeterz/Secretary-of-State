@@ -18,7 +18,7 @@ module.exports = {
                 files: msgAttachments
             });
         }
-        if(message.author.bot || !process.env.LOG_ENABLED || message?.guildId !== process.env.GUILD_ID) return;
+        if(message.author.bot || !Number.parseInt(process.env.LOG_ENABLED) || message?.guildId !== process.env.GUILD_ID) return;
         let logChannel = message?.guild?.channels?.cache?.get(process.env.LOG_CHANNEL_ID);
         if(!logChannel) return;
         let attachments = [];

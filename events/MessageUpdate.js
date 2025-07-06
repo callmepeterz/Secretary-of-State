@@ -9,7 +9,7 @@ module.exports = {
      * @param {Message} newMessage
      */
     async execute(oldMessage, newMessage) {
-        if(oldMessage.author.bot || !process.env.LOG_ENABLED || oldMessage?.guildId !== process.env.GUILD_ID || oldMessage?.content === newMessage?.content) return;
+        if(oldMessage.author.bot || !Number.parseInt(process.env.LOG_ENABLED) || oldMessage?.guildId !== process.env.GUILD_ID || oldMessage?.content === newMessage?.content) return;
         let logChannel = oldMessage?.guild?.channels?.cache?.get(process.env.LOG_CHANNEL_ID);
        
         let embed = new EmbedBuilder()
