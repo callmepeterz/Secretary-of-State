@@ -48,7 +48,8 @@ module.exports = {
      */
     async execute(interaction, deferred){
         let attachment = interaction.options.getAttachment("file");
-        let contents = interaction.options.getString("question");
+        let prompt = `[The current user sending the following is ${interaction.user.displayName}, mentionable with <@!${interaction.user.id}>]: ` + interaction.options.getString("question");
+        let contents = prompt;
         if(attachment){
             let attachmentData = await getAttachment(attachment);
             contents = [
@@ -58,7 +59,7 @@ module.exports = {
                         data: attachmentData,
                     },
                 },
-                {text: interaction.options.getString("question")}
+                {text: prompt}
             ]
         }
         const response = await interaction.client.ai.models.generateContent({
