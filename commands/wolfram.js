@@ -1,6 +1,6 @@
-const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, ChatInputCommandInteraction, EmbedBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBuilder, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const https = require("node:https");
-const pct = require("pct");
+const encodeURL = require("../util/encodeURL.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -37,20 +37,20 @@ module.exports = {
 
     /**
      * @param {ChatInputCommandInteraction} interaction 
+     * @param {InteractionResponse} deferred
      */
-    async execute(interaction){
+    async execute(interaction, deferred){
         let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let q = interaction.options.getString("query");
         let embed = new EmbedBuilder()
         .setColor(color)
         .setTitle(q.slice(0, 256))
-        let deferred = await interaction.deferReply();
         if(interaction.options.getSubcommand() === "short"){
-            let data = await get(`/v1/result?appid=${process.env.WOLFRAM_ALPHA_APPID_1}&i=${encode(q)}&units=metric&timeout=10`);
+            let data = await get(`/v1/result?appid=${process.env.WOLFRAM_ALPHA_APPID_1}&i=${encodeURL(q)}&units=metric&timeout=10`);
             deferred.edit({embeds: [embed.setDescription("```\n"+data.join().slice(0, 2000)+"\n```")]});
         }
         else if(interaction.options.getSubcommand() === "img"){
-            let data = await get(`/v1/simple?appid=${process.env.WOLFRAM_ALPHA_APPID_2}&i=${encode(q)}&units=metric&timeout=10&layout=labelbar&fontsize=30&width=500`);
+            let data = await get(`/v1/simple?appid=${process.env.WOLFRAM_ALPHA_APPID_2}&i=${encodeURL(q)}&units=metric&timeout=10&layout=labelbar&fontsize=30&width=500`);
             deferred.edit({
                 embeds: [embed.setImage("attachment://wolfram.png")],
                 files:[
@@ -80,12 +80,4 @@ async function get(path) {
             res.on("end", () => resolve(data));
         }).end();
     });
-}
-
-function encode(str) {
-  return Array.from(str).map(char => {
-    return /[A-Za-z0-9]/.test(char)
-      ? char
-      : '%' + new TextEncoder().encode(char)[0].toString(16).toUpperCase().padStart(2, '0');
-  }).join('');
 }

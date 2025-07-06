@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandBooleanOption, ChatInputCommandInteraction, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandBooleanOption, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, MessageFlags } = require('discord.js');
 const https = require("node:https");
 
 module.exports = {
@@ -39,17 +39,18 @@ module.exports = {
     index: "Tool",
     cooldown: 3500,
 
-    /**
+   /**
      * @param {ChatInputCommandInteraction} interaction 
+     * @param {InteractionResponse} deferred
      */
-    async execute(interaction){
-        let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
+    async execute(interaction, deferred){
+        let color = interaction?.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let min = interaction.options.getInteger("min");
         let max = interaction.options.getInteger("max");
         let n = interaction.options.getInteger("n") ?? 1;
         let replacement = interaction.options.getBoolean("duplicates") ?? true;
         let embed = new EmbedBuilder().setColor(color);
-        if(max <= min) return interaction.reply({embeds: [embed.setDescription("Invalid range!")]});
+        if(max <= min) return deferred.edit({embeds: [embed.setDescription("Invalid range!")], flags: MessageFlags.Ephemeral});
         get({min, max, n, replacement, base: 10}, data => {
             let json;
             try {
@@ -64,7 +65,7 @@ module.exports = {
             embed
             .setFooter({text: "Powered by random.org"})
             .setDescription(t);
-            interaction.reply({
+            deferred.edit({
                 embeds: [embed]
             });
         });

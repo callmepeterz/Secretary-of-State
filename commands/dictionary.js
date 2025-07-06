@@ -1,6 +1,6 @@
-const { SlashCommandBuilder, SlashCommandStringOption, ChatInputCommandInteraction, MessageFlags, EmbedBuilder, ActionRowBuilder, ButtonStyle, ComponentType } = require('discord.js');
+const { SlashCommandBuilder, SlashCommandStringOption, ChatInputCommandInteraction, InteractionResponse, MessageFlags, EmbedBuilder, ActionRowBuilder, ButtonStyle, ComponentType } = require('discord.js');
 const https = require("node:https");
-const pct = require("pct");
+const encodeURL = require("../util/encodeURL.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,11 +19,11 @@ module.exports = {
 
     /**
      * @param {ChatInputCommandInteraction} interaction 
+     * @param {InteractionResponse} deferred
      */
-    async execute(interaction) {
+    async execute(interaction, deferred){
         let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let word = interaction.options.getString("word");
-        let deferred = await interaction.deferReply();
         get(word, data => {
             let json
             try {
@@ -38,7 +38,7 @@ module.exports = {
                     components: getActionRow(0, embeds.length),
                     withResponse: true
                 })
-                .then(m => listDefinitions(m, 0, embeds, interaction.user.id))
+                .then(m => listDefinitions(m, 0, embeds, interaction.user.id, interaction))
                 .catch(() => {});
         });
     }
@@ -51,7 +51,7 @@ function announceEmbed(t, c) {
 function get(w, fn) {
     let options = {
         hostname: "api.dictionaryapi.dev",
-        path: `/api/v2/entries/en/${pct.encode(w)}`,
+        path: `/api/v2/entries/en/${encodeURL(w)}`,
         method: "GET"
     }
     let data = "";
@@ -112,7 +112,7 @@ function makeEmbeds(a, c) {
     return embeds;
 }
 
-function listDefinitions(message, i, embeds, a) {
+async function listDefinitions(message, i, embeds, a, interaction) {
     if (embeds.length === 1) return;
     let filter = res => res.user.id === a;
     message.awaitMessageComponent({
@@ -132,9 +132,9 @@ function listDefinitions(message, i, embeds, a) {
                     components: getActionRow(index, embeds.length),
                     withResponse: true
                 })
-                .then(() => listDefinitions(message, index, embeds, a));
+                .then(() => listDefinitions(message, index, embeds, a, interaction));
         })
-        .catch(() => message.edit({
+        .catch(() => interaction.editReply({
             components: getActionRow(0, 1)
         }));
 }

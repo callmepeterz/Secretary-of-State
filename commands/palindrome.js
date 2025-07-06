@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandBooleanOption, ChatInputCommandInteraction, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandBooleanOption, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder } = require('discord.js');
 const getPalindromes = require("../assets/palindromes.js");
 
 module.exports = {
@@ -25,8 +25,9 @@ module.exports = {
 
     /**
      * @param {ChatInputCommandInteraction} interaction 
+     * @param {InteractionResponse} deferred
      */
-    async execute(interaction){
+    async execute(interaction, deferred){
         let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let n = interaction.options.getInteger("n");
         let verbose = interaction.options.getBoolean("verbose") ?? false;
@@ -36,7 +37,7 @@ module.exports = {
             .setTitle(`Palindromes of ${n}`)
             .setDescription(getPalindromeText(palindromesOutput.palindromes, palindromesOutput.sum));
         if(verbose) embed.addFields({name: "Additional information", value:  `__Type__: ${palindromesOutput.type ?? "None"}\n__Is a Special Number?__: ${palindromesOutput.isSpecial ?? "None"}\n__Algorithm__: ${palindromesOutput.algorithm || "None"}\n__Adjustment Step__: ${palindromesOutput.adjustment || " None"}`});
-        interaction.reply({embeds: [embed]});
+        deferred.edit({embeds: [embed]});
     },
 };
 
