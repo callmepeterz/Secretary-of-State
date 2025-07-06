@@ -5,20 +5,20 @@ const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").
 
 module.exports = {
     data: new SlashCommandBuilder()
-    .setName("gemini")
-    .setDescription("Ask Gemini AI")
+    .setName("ask")
+    .setDescription("Ask the Secretary of State (powered by Gemini AI)")
     .setNSFW(false)
     .addStringOption(
         new SlashCommandStringOption()
         .setName("question")
-        .setDescription("Ask Gemini AI.")
+        .setDescription("Ask the Secretary of State")
         .setRequired(true)
         .setMaxLength(1000)
     )
     .addAttachmentOption(
         new SlashCommandAttachmentOption()
         .setName("file")
-        .setDescription("Send your file to Gemini AI")
+        .setDescription("Send your file")
         .setRequired(false)
     )
     .addStringOption(
@@ -34,7 +34,7 @@ module.exports = {
     .addNumberOption(
         new SlashCommandNumberOption()
         .setName("temperature")
-        .setDescription("Specify temperature for Gemini AI, default is 0.8")
+        .setDescription("Specify temperature for the AI, default is 0.8")
         .setRequired(false)
         .setMinValue(0)
         .setMaxValue(2)
