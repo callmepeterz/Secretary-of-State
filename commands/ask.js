@@ -48,7 +48,7 @@ module.exports = {
      */
     async execute(interaction, deferred){
         let attachment = interaction.options.getAttachment("file");
-        let prompt = `[The current user sending the following is ${interaction.user.displayName} with the ID ${interaction.user.id}, mentionable with <@!${interaction.user.id}>. The current date and time is ${new Date().toString()}.]: ` + interaction.options.getString("question");
+        let prompt = `[The current user sending the following is ${interaction.user.displayName} with the ID ${interaction.user.id}, mentionable with <@${interaction.user.id}>. The current date and time is ${new Date().toString()}.]: ` + interaction.options.getString("question");
         let contents = prompt;
         if(attachment){
             let attachmentData = await getAttachment(attachment);
