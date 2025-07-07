@@ -71,7 +71,10 @@ module.exports = {
             }
         });
         await deferred.edit(response.text.slice(0, 2000));
-        if (response.text.length > 2000) interaction.followUp(response.text.slice(2000, 4000));
+        if (response.text.length > 2000){
+            let msg = await interaction?.followUp(response.text.slice(2000, 4000));
+            if (response.text.length > 4000) msg?.reply(response.text.slice(4000, 6000));
+        }
     },
 };
 
