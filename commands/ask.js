@@ -70,7 +70,8 @@ module.exports = {
                 temperature:interaction.options.getNumber("temperature") ?? 0.8
             }
         });
-        deferred.edit(response.text.slice(0, 2000));
+        await deferred.edit(response.text.slice(0, 2000));
+        if (response.text.length > 2000) interaction.followUp(response.text.slice(2000, 4000));
     },
 };
 
