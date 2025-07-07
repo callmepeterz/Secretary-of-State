@@ -70,10 +70,10 @@ module.exports = {
                 temperature:interaction.options.getNumber("temperature") ?? 0.8
             }
         });
-        await deferred.edit(response.text.slice(0, 2000));
+        await deferred.edit({content: response.text.slice(0, 2000), allowedMentions: {users: [], roles: []}});
         if (response.text.length > 2000){
-            let msg = await interaction?.followUp(response.text.slice(2000, 4000));
-            if (response.text.length > 4000) msg?.reply(response.text.slice(4000, 6000));
+            let msg = await interaction?.followUp({content: response.text.slice(2000, 4000), allowedMentions: {users: [], roles: []}});
+            if (response.text.length > 4000) msg?.reply({content: response.text.slice(4000, 6000), allowedMentions: {users: [], roles: []}});
         }
     },
 };
