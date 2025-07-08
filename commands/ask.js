@@ -2,6 +2,7 @@ const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption,
 const https = require("node:https");
 const fs = require("node:fs");
 const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString();
+const setStatusRegex = /\{\{SetStatus::(.+?)\}\}/;
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -48,7 +49,7 @@ module.exports = {
      */
     async execute(interaction, deferred){
         let attachment = interaction.options.getAttachment("file");
-        let prompt = `[The current user sending the following is ${interaction.user.displayName} with the ID ${interaction.user.id}, mentionable with <@${interaction.user.id}>. The current date and time is ${new Date().toString()}.]: ` + interaction.options.getString("question");
+        let prompt = `[The current user sending the following is ${interaction.user.displayName} with the ID ${interaction.user.id}, mentionable with <@${interaction.user.id}>. The current date and time is ${new Date().toString()}. Your current status is "${interaction.client.user?.presence?.activities?.[0]?.name}"]: ` + interaction.options.getString("question");
         let contents = prompt;
         if(attachment){
             let attachmentData = await getAttachment(attachment);
@@ -70,10 +71,20 @@ module.exports = {
                 temperature:interaction.options.getNumber("temperature") ?? 0.8
             }
         });
-        await deferred.edit({content: response.text.slice(0, 2000), allowedMentions: {users: [], roles: []}});
-        if (response.text.length > 2000){
-            let msg = await interaction?.followUp({content: response.text.slice(2000, 4000), allowedMentions: {users: [], roles: []}});
-            if (response.text.length > 4000) msg?.reply({content: response.text.slice(4000, 6000), allowedMentions: {users: [], roles: []}});
+
+        let responseText = response?.text;
+        let status = responseText.match(setStatusRegex)?.[1]?.slice(0, 128);
+
+        if(status){
+            interaction?.client?.user?.setPresence({activities: [{name: status}], status: "online"});
+        }
+
+        responseText = responseText?.replaceAll(new RegExp(setStatusRegex, "g"), "");
+
+        await deferred?.edit({content: responseText.slice(0, 2000), allowedMentions: {users: [], roles: []}});
+        if (responseText.length > 2000){
+            let msg = await interaction?.followUp({content: responseText.slice(2000, 4000), allowedMentions: {users: [], roles: []}});
+            if (responseText.length > 4000) msg?.reply({content: responseText.slice(4000, 6000), allowedMentions: {users: [], roles: []}});
         }
     },
 };

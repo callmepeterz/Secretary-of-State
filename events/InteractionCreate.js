@@ -46,9 +46,9 @@ module.exports = {
         } catch (error) {
             console.error(error);
             try {            
-                deferred.edit({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });     
+                deferred?.edit({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral }).catch(()=>{});     
             } catch (err) {
-                console.error(err);
+                console.error(error);
             }
         }
     },
