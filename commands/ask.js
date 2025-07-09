@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ChatInputCommandInteraction, InteractionResponse } = require('discord.js');
+const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption } = require('discord.js');
 const https = require("node:https");
 const fs = require("node:fs");
 const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString();
@@ -39,6 +39,18 @@ module.exports = {
         .setRequired(false)
         .setMinValue(0)
         .setMaxValue(2)
+    )
+    .addIntegerOption(
+        new SlashCommandIntegerOption()
+        .setName("key")
+        .setDescription("Specify which Gemini API key to use, default is 1")
+        .setRequired(false)
+        .setMinValue(1)
+        .setMaxValue(2)
+        .setChoices(
+            {name: "Key 1", value: 1},
+            {name: "Key 2", value: 2}
+        )
     ),
     index: "Tool",
     cooldown: 5000,
@@ -63,7 +75,15 @@ module.exports = {
                 {text: prompt}
             ];
         }
-        const response = await interaction.client.ai.models.generateContent({
+        const selectedKey = interaction.options.getInteger("key") ?? 1;
+        const aiInstance = interaction.client.ai[selectedKey];
+        
+        if (!aiInstance) {
+            await deferred?.edit({content: "❌ Invalid API key selection. Please use key 1 or 2.", allowedMentions: {users: [], roles: []}});
+            return;
+        }
+
+        const response = await aiInstance.models.generateContent({
             model: interaction.options.getString("model") ?? "gemini-2.5-flash",
             contents,
             config: {
@@ -78,6 +98,8 @@ module.exports = {
         if(status){
             interaction?.client?.user?.setPresence({activities: [{name: status}], status: "online"});
         }
+
+        interaction.client.user.set
 
         responseText = responseText?.replaceAll(new RegExp(setStatusRegex, "g"), "");
 

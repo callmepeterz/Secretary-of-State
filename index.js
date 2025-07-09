@@ -8,7 +8,12 @@ const { GoogleGenAI } = require("@google/genai");
 
 client.commands = new Collection();
 client.cooldowns = new Collection();
-client.ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// Default is 1
+client.ai = {
+    1: new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }),
+    2: new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY_2 })
+};
 
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file=>file.endsWith(".js"));
