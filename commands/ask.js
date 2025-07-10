@@ -99,26 +99,36 @@ module.exports = {
      */
     async execute(interaction, deferred){
         let attachment = interaction.options.getAttachment("file");
-        let prompt = `[The current user sending the following is ${interaction.user.displayName} with the ID ${interaction.user.id}, mentionable with <@${interaction.user.id}>. The current date and time is ${new Date().toString()}. Your current status is "${interaction.client.user?.presence?.activities?.[0]?.name || interaction.client.status.description}, which was set at ${interaction.client.status.timeStamp?.toString()}". Your current banner is ${interaction.client.banner.description}, set at ${interaction.client.banner.timeStamp?.toString()}]: ` + interaction.options.getString("question");
-        prompt = prompt
+        let systemPromptHeader = `Current user: ${interaction.user.displayName}, ID: ${interaction.user.id}, mentionable with <@${interaction.user.id}>; Current date and time: ${new Date().toString()}; Current status: "${interaction.client.user?.presence?.activities?.[0]?.name || interaction.client.status.description}, set at ${interaction.client.status.timeStamp?.toString()}"; Current banner: ${interaction.client.banner.description}, set at ${interaction.client.banner.timeStamp?.toString()}`;
+        let prompt = interaction.options.getString("question")
         ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
         ?.replaceAll(new RegExp(setBannerRegex, "g"), "");
-        let contents = prompt;
+        let contents = [
+            {
+                text: prompt,
+                role: "user"
+            },
+            {
+                text: systemPromptHeader,
+                role: "model"
+            }
+        ];
         let mimeType = (attachment?.contentType === "application/javascript" || attachment?.contentType === "application/javascript; charset=utf-8") ? "text/javascript" : attachment?.contentType;
         let attachmentData = null;
+
+        if(!prompt) return deferred?.edit("Invalid prompt!");
 
         if(attachment){
             if(supportedFileFormats.includes(mimeType)){
                 attachmentData = await getAttachment(attachment);
-                contents = [
+                contents.push(
                     {
                         inlineData: {
                             mimeType,
                             data: attachmentData,
                         },
                     },
-                    {text: prompt}
-                ];
+                );
             }
             else attachment = null;
         }
