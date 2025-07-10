@@ -113,7 +113,7 @@ module.exports = {
         if (bannerDesc && attachment) {
             // handle time duraction for rate limiting
             let currentTime = Date.now();
-            if (currentTime - interaction.client.banner.timeStamp > 60000 || !interaction.client.banner.timeStamp) {
+            if (currentTime - interaction.client.banner.timeStamp > 60000 * 5 || !interaction.client.banner.timeStamp) {
                 console.log("Setting banner with provided image...", bannerDesc);
                 // set the banner image if provided - Discord expects data URI format
                 let dataUri = `data:${attachment.contentType};base64,${attachmentData}`;
@@ -130,7 +130,9 @@ module.exports = {
                 console.log("Cannot update banner. Please wait for at least 1 minute before updating again.");
             }
         }
-        responseText = responseText?.replaceAll(new RegExp(setStatusRegex, "g"), "");
+        responseText = responseText
+        ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
+        ?.replaceAll(new RegExp(setBannerRegex, "g"), "");
 
         await deferred?.edit({content: responseText.slice(0, 2000), allowedMentions: {users: [], roles: []}});
         if (responseText.length > 2000){
