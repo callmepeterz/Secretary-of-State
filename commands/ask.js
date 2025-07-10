@@ -3,6 +3,7 @@ const https = require("node:https");
 const fs = require("node:fs");
 const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString();
 const setStatusRegex = /\{\{SetStatus::(.+?)\}\}/;
+const setBannerRegex = /\{\{SetBanner::(.+?)\}\}/;
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,7 +14,7 @@ module.exports = {
         new SlashCommandStringOption()
         .setName("question")
         .setDescription("Ask the Secretary of State")
-        .setRequired(true)
+        .setRequired(true)  
         .setMaxLength(1000)
     )
     .addAttachmentOption(
@@ -61,10 +62,12 @@ module.exports = {
      */
     async execute(interaction, deferred){
         let attachment = interaction.options.getAttachment("file");
-        let prompt = `[The current user sending the following is ${interaction.user.displayName} with the ID ${interaction.user.id}, mentionable with <@${interaction.user.id}>. The current date and time is ${new Date().toString()}. Your current status is "${interaction.client.user?.presence?.activities?.[0]?.name}"]: ` + interaction.options.getString("question");
+        let prompt = `[The current user sending the following is ${interaction.user.displayName} with the ID ${interaction.user.id}, mentionable with <@${interaction.user.id}>. The current date and time is ${new Date().toString()}. Your current status is "${interaction.client.user?.presence?.activities?.[0]?.name || interaction.client.status.description}, which was set at ${interaction.client.status.timeStamp?.toString()}". Your current banner is ${interaction.client.banner.description}, set at ${interaction.client.banner.timeStamp?.toString()}]: ` + interaction.options.getString("question");
         let contents = prompt;
+        let attachmentData = null;
+
         if(attachment){
-            let attachmentData = await getAttachment(attachment);
+            attachmentData = await getAttachment(attachment);
             contents = [
                 {
                     inlineData: {
@@ -94,13 +97,39 @@ module.exports = {
 
         let responseText = response?.text;
         let status = responseText.match(setStatusRegex)?.[1]?.slice(0, 128);
+        let bannerDesc = responseText.match(setBannerRegex)?.[1]?.slice(0, 128);
 
         if(status){
             interaction?.client?.user?.setPresence({activities: [{name: status}], status: "online"});
+            console.log("Setting status to:", status);
+            // handle time duraction for rate limiting 
+            let currentTime = Date.now();
+            // update the status timestamp
+            interaction.client.status.timeStamp = currentTime; 
+            // set the new status description
+            interaction.client.status.description = status;
         }
 
-        interaction.client.user.set
-
+        if (bannerDesc && attachment) {
+            // handle time duraction for rate limiting
+            let currentTime = Date.now();
+            if (currentTime - interaction.client.banner.timeStamp > 60000 || !interaction.client.banner.timeStamp) {
+                console.log("Setting banner with provided image...", bannerDesc);
+                // set the banner image if provided - Discord expects data URI format
+                let dataUri = `data:${attachment.contentType};base64,${attachmentData}`;
+                interaction?.client?.user?.setBanner(dataUri)
+                    .then(() => {
+                        console.log("Banner updated successfully.");
+                        // update the banner timestamp
+                        interaction.client.banner.timeStamp = currentTime; 
+                        // set the new banner description
+                        interaction.client.banner.description = bannerDesc;
+                    })
+                    .catch(err => console.error("Failed to update banner:", err));
+            } else {
+                console.log("Cannot update banner. Please wait for at least 1 minute before updating again.");
+            }
+        }
         responseText = responseText?.replaceAll(new RegExp(setStatusRegex, "g"), "");
 
         await deferred?.edit({content: responseText.slice(0, 2000), allowedMentions: {users: [], roles: []}});

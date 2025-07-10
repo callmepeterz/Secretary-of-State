@@ -15,6 +15,17 @@ client.ai = {
     2: new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY_2 })
 };
 
+// storing banner description
+client.banner = {
+    timeStamp: null,
+    description: "Not available.",
+}
+// storing status stuffs
+client.status = {
+    timeStamp: null,
+    description: "Not available.",
+}
+
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file=>file.endsWith(".js"));
 
