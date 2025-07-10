@@ -4,6 +4,43 @@ const fs = require("node:fs");
 const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString();
 const setStatusRegex = /\{\{SetStatus::(.+?)\}\}/;
 const setBannerRegex = /\{\{SetBanner::(.+?)\}\}/;
+const supportedFileFormats = [ 
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+  "audio/wav",
+  "audio/mp3",
+  "audio/aiff",
+  "audio/aac",
+  "audio/ogg",
+  "audio/flac",
+  "video/mp4",
+  "video/mpeg",
+  "video/mov",
+  "video/avi",
+  "video/x-flv",
+  "video/mpg",
+  "video/webm",
+  "video/wmv",
+  "video/3gpp",
+  "text/plain",
+  "text/html",
+  "text/css",
+  "text/javascript",
+  "application/x-javascript",
+  "text/x-typescript",
+  "application/x-typescript",
+  "text/csv",
+  "text/markdown",
+  "text/x-python",
+  "application/x-python-code",
+  "application/json",
+  "text/xml",
+  "application/rtf",
+  "text/rtf"
+];
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -63,20 +100,27 @@ module.exports = {
     async execute(interaction, deferred){
         let attachment = interaction.options.getAttachment("file");
         let prompt = `[The current user sending the following is ${interaction.user.displayName} with the ID ${interaction.user.id}, mentionable with <@${interaction.user.id}>. The current date and time is ${new Date().toString()}. Your current status is "${interaction.client.user?.presence?.activities?.[0]?.name || interaction.client.status.description}, which was set at ${interaction.client.status.timeStamp?.toString()}". Your current banner is ${interaction.client.banner.description}, set at ${interaction.client.banner.timeStamp?.toString()}]: ` + interaction.options.getString("question");
+        prompt = prompt
+        ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
+        ?.replaceAll(new RegExp(setBannerRegex, "g"), "");
         let contents = prompt;
+        let mimeType = (attachment?.contentType === "application/javascript" || attachment?.contentType === "application/javascript; charset=utf-8") ? "text/javascript" : attachment?.contentType;
         let attachmentData = null;
 
         if(attachment){
-            attachmentData = await getAttachment(attachment);
-            contents = [
-                {
-                    inlineData: {
-                        mimeType: attachment.contentType,
-                        data: attachmentData,
+            if(supportedFileFormats.includes(mimeType)){
+                attachmentData = await getAttachment(attachment);
+                contents = [
+                    {
+                        inlineData: {
+                            mimeType,
+                            data: attachmentData,
+                        },
                     },
-                },
-                {text: prompt}
-            ];
+                    {text: prompt}
+                ];
+            }
+            else attachment = null;
         }
         const selectedKey = interaction.options.getInteger("key") ?? 1;
         const aiInstance = interaction.client.ai[selectedKey];
@@ -110,13 +154,13 @@ module.exports = {
             interaction.client.status.description = status;
         }
 
-        if (bannerDesc && attachment) {
+        if (bannerDesc && attachment && mimeType?.startsWith("image/")) {
             // handle time duraction for rate limiting
             let currentTime = Date.now();
             if (currentTime - interaction.client.banner.timeStamp > 60000 * 5 || !interaction.client.banner.timeStamp) {
                 console.log("Setting banner with provided image...", bannerDesc);
                 // set the banner image if provided - Discord expects data URI format
-                let dataUri = `data:${attachment.contentType};base64,${attachmentData}`;
+                let dataUri = `data:${mimeType};base64,${attachmentData}`;
                 interaction?.client?.user?.setBanner(dataUri)
                     .then(() => {
                         console.log("Banner updated successfully.");
