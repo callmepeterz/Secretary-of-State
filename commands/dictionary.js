@@ -1,19 +1,19 @@
 const { SlashCommandBuilder, SlashCommandStringOption, ChatInputCommandInteraction, InteractionResponse, MessageFlags, EmbedBuilder, ActionRowBuilder, ButtonStyle, ComponentType } = require('discord.js');
-const https = require("node:https");
+const get = require("../util/httpsGet.js");
 const encodeURL = require("../util/encodeURL.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
-    .setName("dictionary")
-    .setDescription("Defines a word")
-    .setNSFW(false)
-    .addStringOption(
-        new SlashCommandStringOption()
-        .setName("word")
-        .setDescription("The word to be defined")
-        .setRequired(true)
-        .setMaxLength(200)
-    ),
+        .setName("dictionary")
+        .setDescription("Defines a word")
+        .setNSFW(false)
+        .addStringOption(
+            new SlashCommandStringOption()
+                .setName("word")
+                .setDescription("The word to be defined")
+                .setRequired(true)
+                .setMaxLength(200)
+        ),
     index: "Tool",
     isDeferred: true,
     cooldown: 3500,
@@ -22,47 +22,31 @@ module.exports = {
      * @param {ChatInputCommandInteraction} interaction 
      * @param {InteractionResponse} deferred
      */
-    async execute(interaction, deferred){
+    async execute(interaction, deferred) {
         let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let word = interaction.options.getString("word");
-        get(word, data => {
-            let json
-            try {
-                json = JSON.parse(data);
-            } catch (error) {
-                return deferred.edit({embeds: [announceEmbed("Encountered an error! Please try again.", color)], flags: MessageFlags.Ephemeral});
-            }
-            if (!json[0]) return deferred.edit({embeds: [announceEmbed(`No definitions found for "${word.slice(0, 1000)}"!`, color)], flags: MessageFlags.Ephemeral});
-            let embeds = makeEmbeds(json, color);
-            deferred.edit({
-                    embeds: [embeds[0]],
-                    components: getActionRow(0, embeds.length),
-                    withResponse: true
-                })
-                .then(m => listDefinitions(m, 0, embeds, interaction.user.id, interaction))
-                .catch(() => {});
-        });
+        let data = await get(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURL(word)}`);
+        let json;
+        try {
+            json = JSON.parse(data?.join(""));
+        } catch (error) {
+            return deferred.edit({ embeds: [announceEmbed("Encountered an error! Please try again.", color)], flags: MessageFlags.Ephemeral });
+        }
+        if (!json[0]) return deferred.edit({ embeds: [announceEmbed(`No definitions found for "${word.slice(0, 1000)}"!`, color)], flags: MessageFlags.Ephemeral });
+        let embeds = makeEmbeds(json, color);
+        deferred.edit({
+            embeds: [embeds[0]],
+            components: getActionRow(0, embeds.length),
+            withResponse: true
+        })
+            .then(m => listDefinitions(m, 0, embeds, interaction.user.id, interaction))
+            .catch(() => { });
+
     }
 };
 
 function announceEmbed(t, c) {
     return new EmbedBuilder().setColor(c).setDescription(t);
-}
-
-function get(w, fn) {
-    let options = {
-        hostname: "api.dictionaryapi.dev",
-        path: `/api/v2/entries/en/${encodeURL(w)}`,
-        method: "GET"
-    }
-    let data = "";
-    https.request(options, res => {
-        res.on("error", err => {
-            throw err
-        });
-        res.on("data", chunk => data += chunk);
-        res.on("end", () => fn(data));
-    }).end();
 }
 
 function phoneticsText(a) {
@@ -90,7 +74,7 @@ function definitionFields(a) {
         v.definitions.forEach(v => {
             let sy = arrStr(v.synonyms?.slice(0, 5));
             let an = arrStr(v.antonyms?.slice(0, 5));
-            let t = `**• ${v.definition}**\n${v.example?`> *${v.example}*\n`:""}${sy?`__Synonyms__: ${sy}\n`:""}${an?`__Antonyms__: ${an}\n`:""}\n`;
+            let t = `**• ${v.definition}**\n${v.example ? `> *${v.example}*\n` : ""}${sy ? `__Synonyms__: ${sy}\n` : ""}${an ? `__Antonyms__: ${an}\n` : ""}\n`;
             if (f.value.length + t.length <= 1020) f.value += t;
         });
         if (fields.length < 25) fields.push(f);
@@ -105,9 +89,9 @@ function makeEmbeds(a, c) {
             .setColor(c)
             .setTitle(v.word.slice(0, 250))
             .addFields(...definitionFields(v.meanings))
-            .setFooter({text:`Page ${i + 1} of ${a.length}`});
+            .setFooter({ text: `Page ${i + 1} of ${a.length}` });
         let pText = phoneticsText(v.phonetics);
-        if(pText) embed.setDescription(pText);
+        if (pText) embed.setDescription(pText);
         embeds.push(embed);
     });
     return embeds;
@@ -117,9 +101,9 @@ async function listDefinitions(message, i, embeds, a, interaction) {
     if (embeds.length === 1) return;
     let filter = res => res.user.id === a;
     message.awaitMessageComponent({
-            filter,
-            time: 30000
-        })
+        filter,
+        time: 30000
+    })
         .then(collected => {
             let options = {
                 a: 0,
@@ -129,10 +113,10 @@ async function listDefinitions(message, i, embeds, a, interaction) {
             }
             let index = options[collected.customId];
             collected.update({
-                    embeds: [embeds[index]],
-                    components: getActionRow(index, embeds.length),
-                    withResponse: true
-                })
+                embeds: [embeds[index]],
+                components: getActionRow(index, embeds.length),
+                withResponse: true
+            })
                 .then(() => listDefinitions(message, index, embeds, a, interaction));
         })
         .catch(() => interaction.editReply({
@@ -171,5 +155,5 @@ function getActionRow(i, n) {
             disabled: i === n - 1
         }
     ];
-    return n > 1 ? [new ActionRowBuilder({components})] : [];
+    return n > 1 ? [new ActionRowBuilder({ components })] : [];
 }

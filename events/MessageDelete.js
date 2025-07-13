@@ -1,5 +1,5 @@
 const { Events, Message, AttachmentBuilder, EmbedBuilder } = require("discord.js");
-const https = require("node:https");
+const get = require("../util/httpsGet.js");
 
 module.exports = {
     name: Events.MessageDelete,
@@ -31,7 +31,7 @@ module.exports = {
             .setTimestamp(message.createdTimestamp)
         for(let element of message.attachments) {
             let a = element[1];
-            let data = await getAttachment(a);
+            let data = await get(a.url);
             attachments.push(
                 new AttachmentBuilder()
                     .setName(a.name)
@@ -45,7 +45,10 @@ module.exports = {
             }
             attachmentList += `[${a.name}](${a.url} '${a.name}')\n`;
         }
-        if (message.content) embed.addFields({name: "Message Content", value: message.content.slice(0, 1024)});
+        if (message.content) {
+            if(message.content.length > 1024) embed.addFields({name: "Message Content", value: message.content.slice(0, 1024)}, {name: "\u200b", value: message.content.slice(1024, 2048)});
+            else embed.addFields({name: "Message Content", value: message.content.slice(0, 1024)});
+        }
         if (attachments.length > 0) embed.addFields({name: "Attachments", value: attachmentList.slice(0, 1024)});
         logChannel.send({
             embeds : [embed],
@@ -53,25 +56,3 @@ module.exports = {
         });
     },
 };
-
-async function getAttachment(a){
-    return new Promise(resolve => {
-        let data = [];
-        let urlparts = a.url
-            .replace("https://", "")
-            .replace("http://", "")
-            .split("/");
-        let host = urlparts[0];
-        let p = "/" + urlparts.slice(1).join("/");
-
-        https.request({
-            hostname: host,
-            path: p,
-            method: "GET"
-        }, (res) => {
-            res.on("data", (chunk) => data.push(chunk));
-            res.on("end", () => resolve(data));
-            res.on("error", (err) => console.error(err));
-        }).end();
-    });
-}

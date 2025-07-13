@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption } = require('discord.js');
-const https = require("node:https");
+const get = require("../util/httpsGet.js");
 const fs = require("node:fs");
 const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString();
 const setStatusRegex = /\{\{SetStatus::(.+?)\}\}/;
@@ -121,7 +121,8 @@ module.exports = {
 
         if(attachment){
             if(supportedFileFormats.includes(mimeType)){
-                attachmentData = await getAttachment(attachment);
+                let rawattachmentData = await get(attachment.url);
+                attachmentData = Buffer.concat(rawattachmentData).toString("base64");
                 contents.push(
                     {
                         inlineData: {
@@ -196,25 +197,3 @@ module.exports = {
         }
     },
 };
-
-async function getAttachment(a){
-    return new Promise(resolve => {
-        let data = [];
-        let urlparts = a.url
-            .replace("https://", "")
-            .replace("http://", "")
-            .split("/");
-        let host = urlparts[0];
-        let p = "/" + urlparts.slice(1).join("/");
-
-        https.request({
-            hostname: host,
-            path: p,
-            method: "GET"
-        }, (res) => {
-            res.on("data", (chunk) => data.push(chunk));
-            res.on("end", () => resolve(Buffer.concat(data).toString("base64")));
-            res.on("error", (err) => console.error(err));
-        }).end();
-    });
-}
