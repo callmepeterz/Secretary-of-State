@@ -21,6 +21,7 @@ module.exports = {
         .setRequired(false)
     ),
     index: "Tool",
+    isDeferred: false,
     cooldown: 1500,
 
     /**
@@ -37,7 +38,7 @@ module.exports = {
             .setTitle(`Palindromes of ${n}`)
             .setDescription(getPalindromeText(palindromesOutput.palindromes, palindromesOutput.sum));
         if(verbose) embed.addFields({name: "Additional information", value:  `__Type__: ${palindromesOutput.type ?? "None"}\n__Is a Special Number?__: ${palindromesOutput.isSpecial ?? "None"}\n__Algorithm__: ${palindromesOutput.algorithm || "None"}\n__Adjustment Step__: ${palindromesOutput.adjustment || " None"}`});
-        deferred.edit({embeds: [embed]});
+        interaction.reply({embeds: [embed]});
     },
 };
 

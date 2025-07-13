@@ -15,6 +15,7 @@ module.exports = {
         .setMaxLength(200)
     ),
     index: "Tool",
+    isDeferred: true,
     cooldown: 3500,
 
     /**

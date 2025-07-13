@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -6,6 +6,7 @@ module.exports = {
     .setDescription("Sends info about latency")
     .setNSFW(false),
     index: "Tool",
+    isDeferred: false,
     cooldown: 1000,
 
     /**
@@ -16,10 +17,10 @@ module.exports = {
         let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let embed = new EmbedBuilder().setColor(color);
         let msg = await interaction.channel?.send("Pinging...").catch(()=>{});
-        if(!msg) return deferred?.edit({embeds: [embed.setDescription("Could not get latency!")]});
+        if(!msg) return interaction?.reply({embeds: [embed.setDescription("Could not get latency!")], flags: MessageFlags});
         let msgTimestamp = msg?.createdTimestamp;
         msg.delete().catch(()=>{});
         embed.setDescription(`**Command latency: ** ${msgTimestamp - interaction.createdTimestamp} ms\n**API latency: **${interaction.client.ws.ping === -1 ? "Not available" : `${interaction.client.ws.ping} ms`}`);
-        deferred?.edit({embeds: [embed]});
+        interaction?.reply({embeds: [embed]});
     },
 };

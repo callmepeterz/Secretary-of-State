@@ -91,6 +91,7 @@ module.exports = {
         )
     ),
     index: "Tool",
+    isDeferred: true,
     cooldown: 5000,
 
     /**

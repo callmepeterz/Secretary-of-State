@@ -37,6 +37,7 @@ module.exports = {
         .setRequired(false)
     ),
     index: "Tool",
+    isDeferred: false,
     cooldown: 3500,
 
    /**
@@ -50,7 +51,7 @@ module.exports = {
         let n = interaction.options.getInteger("n") ?? 1;
         let replacement = interaction.options.getBoolean("duplicates") ?? true;
         let embed = new EmbedBuilder().setColor(color);
-        if(max <= min) return deferred.edit({embeds: [embed.setDescription("Invalid range!")], flags: MessageFlags.Ephemeral});
+        if(max <= min) return interaction?.reply({embeds: [embed.setDescription("Invalid range!")], flags: MessageFlags.Ephemeral});
         get({min, max, n, replacement, base: 10}, data => {
             let json;
             try {
@@ -65,7 +66,7 @@ module.exports = {
             embed
             .setFooter({text: "Powered by random.org"})
             .setDescription(t);
-            deferred.edit({
+            interaction?.reply({
                 embeds: [embed]
             });
         });

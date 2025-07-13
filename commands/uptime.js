@@ -6,6 +6,7 @@ module.exports = {
     .setDescription("Sends info about uptime")
     .setNSFW(false),
     index: "Tool",
+    isDeferred: false,
     cooldown: 1000,
 
     /**
@@ -18,6 +19,6 @@ module.exports = {
         .setDescription(`This bot has been up since <t:${Math.round((Date.now() - interaction.client.uptime)/1000)}:F>, <t:${Math.round((Date.now() - interaction.client.uptime)/1000)}:R>`)
         .setColor(color);
 
-        deferred?.edit({embeds: [embed]});
+        interaction?.reply({embeds: [embed]});
     },
 };

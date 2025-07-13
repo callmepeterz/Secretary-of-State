@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, MessageFlags } = require('discord.js');
 const encodeURL = require("../util/encodeURL");
 
 module.exports = {
@@ -7,6 +7,7 @@ module.exports = {
     .setDescription("Sends an invite to the server")
     .setNSFW(false),
     index: "Tool",
+    isDeferred: false,
     cooldown: 1000,
 
     /**
@@ -18,7 +19,7 @@ module.exports = {
         let embed = new EmbedBuilder().setColor(color);
         let invites = await interaction?.guild?.invites?.fetch();
         let invite = invites.filter(i => i.channel.name === "welcome").first() ?? invites.first();
-        if(!invite) return deferred?.edit({embeds: [embed.setDescription("Could not find invites!")]});
+        if(!invite) return interaction?.reply({embeds: [embed.setDescription("Could not find invites!")], flags: MessageFlags.Ephemeral});
 
         embed
         .setTitle(invite.guild.name)
@@ -30,6 +31,6 @@ module.exports = {
             {name: "Max uses", value: `${invite.maxUses || "∞"}`, inline: true}
         )
         .setThumbnail(`http://api.qrserver.com/v1/create-qr-code/?data=${encodeURL(invite.url)}&size=150x150&qzone=1`)
-        deferred?.edit({embeds: [embed]});
+        interaction?.reply({embeds: [embed]});
     },
 };

@@ -27,14 +27,18 @@ module.exports = {
         const timestamps = cooldowns.get(command.data.name);
         const cooldownAmount = (command.cooldown ?? process.env.DEFAULT_COOLDOWN);
         
-        let deferred = await interaction.deferReply();
+        let deferred = null;
+        if(command.isDeferred) deferred = await interaction.deferReply();
 
         if (timestamps.has(interaction.user.id)) {
             const expirationTime = timestamps.get(interaction.user.id) + cooldownAmount;
 
             if (now < expirationTime) {
-                interaction.followUp({ content: `You are on a cooldown for \`${command.data.name}\`. You can use it again <t:${Math.round(expirationTime/1000)}:R>.`, flags: MessageFlags.Ephemeral });
-                return deferred.delete();
+                if(command.isDeferred){
+                    interaction.followUp({ content: `You are on a cooldown for \`${command.data.name}\`. You can use it again <t:${Math.round(expirationTime/1000)}:R>.`, flags: MessageFlags.Ephemeral });
+                    return deferred.delete();
+                }
+                else return interaction.reply({ content: `You are on a cooldown for \`${command.data.name}\`. You can use it again <t:${Math.round(expirationTime/1000)}:R>.`, flags: MessageFlags.Ephemeral });
             }
         }
 
@@ -46,7 +50,8 @@ module.exports = {
         } catch (error) {
             console.error(error);
             try {            
-                deferred?.edit({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral }).catch(()=>{});     
+                if(command.isDeferred) deferred?.edit({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral }).catch(()=>{});     
+                else interaction?.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral }).catch(()=>{});
             } catch (err) {
                 console.error(error);
             }

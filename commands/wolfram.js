@@ -33,6 +33,7 @@ module.exports = {
     ),
     
     index: "Tool",
+    isDeferred: true,
     cooldown: 4000,
 
     /**
@@ -47,11 +48,11 @@ module.exports = {
         .setTitle(q.slice(0, 256))
         if(interaction.options.getSubcommand() === "short"){
             let data = await get(`/v1/result?appid=${process.env.WOLFRAM_ALPHA_APPID_1}&i=${encodeURL(q)}&units=metric&timeout=10`);
-            deferred.edit({embeds: [embed.setDescription("```\n"+data.join().slice(0, 2000)+"\n```")]});
+            deferred?.edit({embeds: [embed.setDescription("```\n"+data.join().slice(0, 2000)+"\n```")]});
         }
         else if(interaction.options.getSubcommand() === "img"){
             let data = await get(`/v1/simple?appid=${process.env.WOLFRAM_ALPHA_APPID_2}&i=${encodeURL(q)}&units=metric&timeout=10&layout=labelbar&fontsize=30&width=500`);
-            deferred.edit({
+            deferred?.edit({
                 embeds: [embed.setImage("attachment://wolfram.png")],
                 files:[
                     new AttachmentBuilder()
