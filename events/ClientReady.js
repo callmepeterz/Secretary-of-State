@@ -12,7 +12,7 @@ module.exports = {
 	 */
 	async execute(client) {
 		console.log("fuck u");
-		return console.log(`Logged in as ${client.user.tag}`);
+		console.log(`Logged in as ${client.user.tag}`);
 
 		let bannerurl = (await client?.user?.fetch()).bannerURL({size: 1024});
 		if (!bannerurl) return console.log("Banner URL not available");
