@@ -12,7 +12,7 @@ module.exports = {
 	 */
 	async execute(client) {
 		console.log("fuck u");
-		console.log(`Logged in as ${client.user.tag}`);
+		return console.log(`Logged in as ${client.user.tag}`);
 
 		let bannerurl = (await client?.user?.fetch()).bannerURL({size: 1024});
 		if (!bannerurl) return console.log("Banner URL not available");
@@ -41,6 +41,6 @@ module.exports = {
 		}).catch(err=>console.error(err));
 
 		client.banner.description = response?.text;
-		console.log("Banner detected: " + client.banner.description)
+		console.log("Banner detected: " + client.banner.description);
 	},
 };
