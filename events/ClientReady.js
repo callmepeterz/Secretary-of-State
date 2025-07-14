@@ -26,7 +26,7 @@ module.exports = {
 				},
 			},
 			{
-				text: "This is a system intitialization event. The attached image is your current banner image. Give a detailed description, as detailed as possible, including any inside jokes or people you know if detected, for the banner image as you normally would when running the SetBanner command (do not include the command syntax, only the description), obeying the usual rules for responses of such command.",
+				text: "This is a system intitialization event. The attached image is your current banner image. Give a detailed but concise description, as detailed as possible, for your future self, not the user, including any inside jokes or people you know if detected, for the banner image as you normally would when running the SetBanner command (do not include the command syntax, only the description), obeying the usual rules for responses of such command (no emojis, only use characters allowed, max length, no mentions, etc.).",
 				role: "model"
 			}
 		];
