@@ -154,6 +154,8 @@ module.exports = {
         ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
         ?.replaceAll(new RegExp(setBannerRegex, "g"), "");
 
+        if(!responseText) responseText = "No text was returned.";
+
         await deferred?.edit({content: responseText.slice(0, 2000), allowedMentions: {users: [], roles: []}});
         if (responseText.length > 2000){
             let msg = await interaction?.followUp({content: responseText.slice(2000, 4000), allowedMentions: {users: [], roles: []}});
