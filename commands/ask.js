@@ -4,43 +4,7 @@ const fs = require("node:fs");
 const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString();
 const setStatusRegex = /\{\{SetStatus::(.+?)\}\}/;
 const setBannerRegex = /\{\{SetBanner::(.+?)\}\}/;
-const supportedFileFormats = [ 
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-  "image/heic",
-  "image/heif",
-  "audio/wav",
-  "audio/mp3",
-  "audio/aiff",
-  "audio/aac",
-  "audio/ogg",
-  "audio/flac",
-  "video/mp4",
-  "video/mpeg",
-  "video/mov",
-  "video/avi",
-  "video/x-flv",
-  "video/mpg",
-  "video/webm",
-  "video/wmv",
-  "video/3gpp",
-  "text/plain",
-  "text/html",
-  "text/css",
-  "text/javascript",
-  "application/x-javascript",
-  "text/x-typescript",
-  "application/x-typescript",
-  "text/csv",
-  "text/markdown",
-  "text/x-python",
-  "application/x-python-code",
-  "application/json",
-  "text/xml",
-  "application/rtf",
-  "text/rtf"
-];
+const supportedFileFormats = require("../assets/geminiSupportedFileFormats.json");
 
 module.exports = {
     data: new SlashCommandBuilder()
