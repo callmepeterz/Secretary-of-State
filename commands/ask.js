@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption } = require('discord.js');
 const get = require("../util/httpsGet.js");
+const formatMath = require("../util/formatMath.js");
 const fs = require("node:fs");
 const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString();
 const setStatusRegex = /\{\{SetStatus::(.+?)\}\}/;
@@ -116,6 +117,10 @@ module.exports = {
         });
 
         let responseText = response?.text;
+
+        //math formatting
+        responseText = formatMath(responseText);
+
         let status = responseText.match(setStatusRegex)?.[1]?.slice(0, 128);
         let bannerDesc = responseText.match(setBannerRegex)?.[1]?.slice(0, 128);
 
@@ -156,10 +161,62 @@ module.exports = {
 
         if(!responseText) responseText = "No text was returned.";
 
-        await deferred?.edit({content: responseText.slice(0, 2000), allowedMentions: {users: [], roles: []}});
-        if (responseText.length > 2000){
-            let msg = await interaction?.followUp({content: responseText.slice(2000, 4000), allowedMentions: {users: [], roles: []}});
-            if (responseText.length > 4000) msg?.reply({content: responseText.slice(4000, 6000), allowedMentions: {users: [], roles: []}});
+        const chunks = splitMarkdownMessage(responseText);
+        let msg;
+
+        for(let x = 0; x < chunks.length; x++){
+            if(x===0) await deferred?.edit({content: chunks[0]?.slice(0, 2000), allowedMentions: {users: [], roles: []}});
+            else if(x===1) msg = await interaction?.followUp({content: chunks[1]?.slice(0, 2000), allowedMentions: {users: [], roles: []}});
+            else msg = await msg?.reply({content: chunks[x]?.slice(0, 2000), allowedMentions: {users: [], roles: []}});
         }
     },
 };
+
+function splitMarkdownMessage(content, maxLength = 2000) {
+  const chunks = [];
+  let current = '';
+  let insideTripleCodeBlock = false;
+  let codeBlockLang = '';
+  let inlineCodeOpen = false;
+
+  const lines = content.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmedLine = line.trim();
+
+    if (trimmedLine.startsWith('```')) {
+      if (!insideTripleCodeBlock) {
+        codeBlockLang = trimmedLine.slice(3).trim();
+        insideTripleCodeBlock = true;
+      } else {
+        insideTripleCodeBlock = false;
+        codeBlockLang = '';
+      }
+    }
+
+    const nextLength = current.length + line.length + 1;
+
+    if (nextLength > maxLength) {
+      if (insideTripleCodeBlock) current += '\n```';
+      chunks.push(current);
+      current = '';
+      if (insideTripleCodeBlock) current += '```' + codeBlockLang + '\n';
+    }
+
+    const backtickMatches = line.match(/`/g);
+    if (backtickMatches && backtickMatches.length % 2 !== 0) {
+      inlineCodeOpen = !inlineCodeOpen;
+    }
+
+    current += (current.length ? '\n' : '') + line;
+  }
+
+  if (current.length) {
+    if (insideTripleCodeBlock) current += '\n```';
+    if (inlineCodeOpen) current += '`';
+    chunks.push(current);
+  }
+
+  return chunks;
+}
