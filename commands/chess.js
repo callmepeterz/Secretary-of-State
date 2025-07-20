@@ -97,8 +97,8 @@ module.exports = {
                     if(compRes.customId !== "accept") return intRes.edit({content: "", embeds: [embed.setDescription("Invitation declined.")], components: []});
                 }
 
-                let date = new Date();
-
+                let date = new Date(Date.now() + (parseFloat(process.env.UTC_OFFSET) * 3600000));
+                
                 chess = {
                     w: {
                         id: isWhite ? currentPlayer?.id : opponent?.id,
@@ -122,8 +122,8 @@ module.exports = {
                 }
                 chess.board = new Chess();
                 chess.board.setHeader("Event", "Secretary of State Chess Game");
-                chess.board.setHeader("Date", `${date.getFullYear()}.${(date.getMonth() + 1).toString().padStart(2, "0")}.${date.getDate().toString().padStart(2, "0")}`);
-                chess.board.setHeader("Time", `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`);
+                chess.board.setHeader("Date", `${date.getUTCFullYear()}.${(date.getUTCMonth() + 1).toString().padStart(2, "0")}.${date.getUTCDate().toString().padStart(2, "0")}`);
+                chess.board.setHeader("Time", `${date.getUTCHours().toString().padStart(2, "0")}:${date.getUTCMinutes().toString().padStart(2, "0")}:${date.getUTCSeconds().toString().padStart(2, "0")}`);
                 chess.board.setHeader("White", chess.w.name);
                 chess.board.setHeader("Black", chess.b.name);
                 
