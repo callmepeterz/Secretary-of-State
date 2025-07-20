@@ -26,6 +26,10 @@ client.status = {
     description: "Not available.",
 }
 
+// storing games
+client.games = {};
+client.games.chess = new Collection();
+
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file=>file.endsWith(".js"));
 

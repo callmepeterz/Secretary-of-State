@@ -5,11 +5,11 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"start": "bun index.js || node index.js",
-        "dev": "bun index.js --watch || node index.js --watch", 
-        "register_app": "bun registerAppCommands.js || node registerAppCommands.js",
-        "register_guild": "bun registerGuildCommands.js || node registerGuildCommands.js",
-        "delete_app": "bun deleteAppCommands.js || node deleteAppCommands.js",
-        "delete_guild": "bun deleteGuildCommands.js || node deleteGuildCommands.js"
+		"dev": "bun index.js --watch || node index.js --watch",
+		"register_app": "bun registerAppCommands.js || node registerAppCommands.js",
+		"register_guild": "bun registerGuildCommands.js || node registerGuildCommands.js",
+		"delete_app": "bun deleteAppCommands.js || node deleteAppCommands.js",
+		"delete_guild": "bun deleteGuildCommands.js || node deleteGuildCommands.js"
 	},
 	"keywords": [],
 	"author": "",
@@ -17,6 +17,7 @@
 	"description": "",
 	"dependencies": {
 		"@google/genai": "^1.8.0",
+		"chess.js": "^1.4.0",
 		"discord.js": "^14.21.0",
 		"dotenv": "^17.0.1"
 	}
