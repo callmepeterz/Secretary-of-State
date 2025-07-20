@@ -143,6 +143,7 @@ module.exports = {
                 else {intRes = (await interaction.reply({content: chess[chess.board.turn()].id === "stockfish" ? "Stockfish" : `<@${chess[chess.board.turn()].id}>`, embeds: [chessStateEmbed(chess, embed)], withResponse: true}))?.resource?.message};
 
                 let thread = await intRes.startThread({name: `${chess.w.name} v. ${chess.b.name} - ${chess.board.getHeaders()?.Date} ${chess.board.getHeaders()?.Time}`.slice(0, 100), autoArchiveDuration: 1440});
+                intRes.edit({content: intRes.content + ` <#${thread.id}>`});
                 thread.send(`# ${chess.w.id === "stockfish" ? "Stockfish" : `<@${chess.w.id}>`} v. ${chess.b.id === "stockfish" ? "Stockfish" : `<@${chess.b.id}>`} - ${chess.board.getHeaders()?.Date} ${chess.board.getHeaders()?.Time}`);
 
                 chess.threadId = thread.id;
