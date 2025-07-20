@@ -278,7 +278,7 @@ function chessStateEmbed(chess, embed, resigned = false, resignColor){
 
     embed
     .setTitle(`♔ ${chess.w.name} v. ♚ ${chess.b.name}`.slice(0, 256))
-    .setDescription(`**${chess.board.turn() === "w" ? `White (<@${chess.w.id}>)` : `Black (<@${chess.b.id}>)`}** to move${lastMove ? `\nLast move: #${chess.board.moveNumber()}. ${getMoveString(lastMove)}` : ""}${chess.board.isCheck() ? `\n${chess.board.turn() === "w" ? "White" : "Black"} <@${chess[chess.board.turn()].id}> is in check` : ""}${chess.board.isGameOver() || resigned ? gameOver : ""}`.slice(0, 4096))
+    .setDescription(`**${chess.board.turn() === "w" ? `White (<@${chess.w.id}>)` : `Black (<@${chess.b.id}>)`}** to move${lastMove ? `\nLast move: ${getMoveString(lastMove)}` : ""}${chess.board.isCheck() ? `\n**${chess.board.turn() === "w" ? "White" : "Black"} <@${chess[chess.board.turn()].id}> is in check**` : ""}${chess.board.isGameOver() || resigned ? gameOver : ""}`.slice(0, 4096))
     .setImage(`https://www.chess.com/dynboard?fen=${encode(chess.board.fen())}&board=green&piece=neo&size=3&coordinates=true${chess.board.turn() === "b" ? "&flip=true" : ""}`);
     return embed;
 }
