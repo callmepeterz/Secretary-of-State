@@ -146,7 +146,7 @@ module.exports = {
                 thread.send(`# ${chess.w.id === "stockfish" ? "Stockfish" : `<@${chess.w.id}>`} v. ${chess.b.id === "stockfish" ? "Stockfish" : `<@${chess.b.id}>`} - ${chess.board.getHeaders()?.Date} ${chess.board.getHeaders()?.Time}`);
 
                 chess.threadId = thread.id;
-                chess.board.setHeader("Site", `<#${chess.threadId}>`)
+                chess.board.setHeader("Site", `<#${chess.threadId}>, #${interaction.channel.name} ${interaction.guild.name.slice(0, 3).toUpperCase()}`)
 
                 interaction.client.games.chess.set([chess.w.id, chess.b.id].join("-"), chess);
                 break;
