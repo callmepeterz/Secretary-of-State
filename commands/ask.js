@@ -112,7 +112,8 @@ module.exports = {
             contents,
             config: {
                 systemInstruction,
-                temperature:interaction.options.getNumber("temperature") ?? 0.8
+                temperature:interaction.options.getNumber("temperature") ?? 0.8,
+                tools: [{ googleSearch: {} }]
             }
         });
 
@@ -124,7 +125,7 @@ module.exports = {
         let status = responseText.match(setStatusRegex)?.[1]?.slice(0, 128);
         let bannerDesc = responseText.match(setBannerRegex)?.[1]?.slice(0, 128);
 
-        if(status){
+        if(status && interaction.context === 0){
             interaction?.client?.user?.setPresence({activities: [{name: status}], status: "online"});
             console.log("Setting status to:", status);
             // handle time duraction for rate limiting 
@@ -135,7 +136,7 @@ module.exports = {
             interaction.client.status.description = status;
         }
 
-        if (bannerDesc && attachment && mimeType?.startsWith("image/")) {
+        if (bannerDesc && attachment && mimeType?.startsWith("image/") && interaction.context === 0) {
             // handle time duraction for rate limiting
             let currentTime = Date.now();
             if (currentTime - interaction.client.banner.timeStamp > 60000 * 5 || !interaction.client.banner.timeStamp) {
