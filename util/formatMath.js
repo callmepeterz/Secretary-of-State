@@ -21,7 +21,7 @@ const superScript = {
 };
 
 
-module.exports = s => {
+function formatMath(s) {
     if (!s) return "";
     s = s.replace(/\{inf\}/gi, "∞");
     extractGroups(s, "subscr#?", "?#").forEach(g=>{s = s.replace(g.fullMatch, formatSubscript(g.captured?.toLowerCase()))});
@@ -99,3 +99,5 @@ function extractGroups(input, startTag, endTag) {
 
     return results;
 }
+
+module.exports = { formatMath, formatSubscript, formatSuperscript, formatRoot }

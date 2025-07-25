@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption } = require('discord.js');
 const get = require("../util/httpsGet.js");
-const formatMath = require("../util/formatMath.js");
+const { formatMath, formatSuperscript } = require("../util/formatMath.js");
 const fs = require("node:fs");
 const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString();
 const setStatusRegex = /\{\{SetStatus::(.+?)\}\}/;
@@ -162,7 +162,7 @@ module.exports = {
 
         if(!responseText) responseText = "No text was returned.";
 
-        const chunks = splitMarkdownMessage(responseText);
+        const chunks = splitMarkdownMessage(responseText)?.filter(Boolean);
         let msg;
 
         for(let x = 0; x < chunks.length; x++){
@@ -178,37 +178,55 @@ function addCitations(response) {
     const supports = response.candidates[0]?.groundingMetadata?.groundingSupports;
     const chunks = response.candidates[0]?.groundingMetadata?.groundingChunks;
 
-    if(!supports?.length || !chunks?.length || !text) return text;
+    if (!supports?.length || !chunks?.length || !text) return text;
 
-    // Sort supports by end_index in descending order to avoid shifting issues when inserting.
     const sortedSupports = [...supports].sort(
-        (a, b) => (b.segment?.endIndex ?? 0) - (a.segment?.endIndex ?? 0),
+        (a, b) => (a.segment?.endIndex ?? 0) - (b.segment?.endIndex ?? 0),
     );
 
+    let pos = 0;
+
     for (const support of sortedSupports) {
-        const endIndex = support.segment?.endIndex;
-        if (endIndex === undefined || !support.groundingChunkIndices?.length) {
-        continue;
+        const chunkText = support.segment?.text;
+        if (chunkText === undefined || !support.groundingChunkIndices?.length) {
+            continue;
         }
 
         const citationLinks = support.groundingChunkIndices
-        .map(i => {
-            const uri = chunks[i]?.web?.uri;
-            const title = chunks[i]?.web?.title;
-            if (uri) {
-            return `[[${i + 1}]](<${uri}> '${title}')`;
-            }
-            return null;
-        })
-        .filter(Boolean);
+            .sort((a, b) => a - b)
+            .map(i => {
+                const uri = chunks[i]?.web?.uri;
+                if (uri) {
+                    return `⁽${formatSuperscript((i + 1).toString())}⁾`;
+                }
+                return null;
+            })
+            .filter(Boolean);
 
         if (citationLinks.length > 0) {
-        const citationString = citationLinks.join("");
-        text = text.slice(0, endIndex) + citationString + text.slice(endIndex);
+            const citationString = citationLinks.join("");
+            const replaced = insertCitation(text, chunkText, citationString, pos);
+            text = replaced.text;
+            pos = replaced.pos;
         }
     }
 
-    return text;
+    let references = "\n### References\n";
+    for (let i = 0; i < chunks.length; i++) {
+        let chunk = chunks[i];
+        if (!chunk?.web) continue;
+        references += `[${i + 1}]: [${chunk.web.title}](<${chunk.web.uri.replaceAll(" ", "+")}>)\n`;
+    }
+
+    return text + references;
+}
+
+function insertCitation(str, chunkText, citation, startIndex) {
+    const startPos = str.indexOf(chunkText, startIndex);
+    if(startPos === -1) return {text: str, pos: startIndex};
+    const head = str.slice(0, startIndex);
+    const tail = str.slice(startIndex).replace(chunkText, chunkText + citation);
+    return {text: head + tail, pos: startPos + chunkText.length + citation.length};
 }
 
 function splitMarkdownMessage(content, maxLength = 2000) {
