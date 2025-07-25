@@ -117,7 +117,7 @@ module.exports = {
             }
         });
 
-        let responseText = response?.text;
+        let responseText = addCitations(response);
 
         //math formatting
         responseText = formatMath(responseText);
@@ -172,6 +172,44 @@ module.exports = {
         }
     },
 };
+
+function addCitations(response) {
+    let text = response?.text;
+    const supports = response.candidates[0]?.groundingMetadata?.groundingSupports;
+    const chunks = response.candidates[0]?.groundingMetadata?.groundingChunks;
+
+    if(!supports?.length || !chunks?.length || !text) return text;
+
+    // Sort supports by end_index in descending order to avoid shifting issues when inserting.
+    const sortedSupports = [...supports].sort(
+        (a, b) => (b.segment?.endIndex ?? 0) - (a.segment?.endIndex ?? 0),
+    );
+
+    for (const support of sortedSupports) {
+        const endIndex = support.segment?.endIndex;
+        if (endIndex === undefined || !support.groundingChunkIndices?.length) {
+        continue;
+        }
+
+        const citationLinks = support.groundingChunkIndices
+        .map(i => {
+            const uri = chunks[i]?.web?.uri;
+            const title = chunks[i]?.web?.title;
+            if (uri) {
+            return `[[${i + 1}]](<${uri}> '${title}')`;
+            }
+            return null;
+        })
+        .filter(Boolean);
+
+        if (citationLinks.length > 0) {
+        const citationString = citationLinks.join("");
+        text = text.slice(0, endIndex) + citationString + text.slice(endIndex);
+        }
+    }
+
+    return text;
+}
 
 function splitMarkdownMessage(content, maxLength = 2000) {
   const chunks = [];
