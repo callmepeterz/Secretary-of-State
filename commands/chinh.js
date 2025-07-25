@@ -23,8 +23,8 @@ module.exports = {
      */
     async execute(interaction, deferred){
         for(let i = 0; i < interaction.options.getInteger("times"); i++){
-            if(i === 0) await interaction.reply(`<@!${process.env.CHINH_ID}> ÔI CHINH ƠI CHINH ƠI CHINH CHINH CHINH`);
-            else await interaction.channel.send(`<@!${process.env.CHINH_ID}> ÔI CHINH ƠI CHINH ƠI CHINH CHINH CHINH`);
+            if(i === 0) await interaction.reply({content: `<@!${process.env.CHINH_ID}> ÔI CHINH ƠI CHINH ƠI CHINH CHINH CHINH`, allowedMentions: {users: [], roles: []}});
+            else await interaction.channel.send({content: `<@!${process.env.CHINH_ID}> ÔI CHINH ƠI CHINH ƠI CHINH CHINH CHINH`, allowedMentions: {users: [], roles: []}});
         }
     },
 };
