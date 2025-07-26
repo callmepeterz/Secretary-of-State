@@ -165,10 +165,18 @@ module.exports = {
         const chunks = splitMarkdownMessage(responseText)?.filter(Boolean);
         let msg;
 
-        for(let x = 0; x < chunks.length; x++){
-            if(x===0) await deferred?.edit({content: chunks[0]?.slice(0, 2000), allowedMentions: {users: [], roles: []}});
-            else if(x===1) msg = await interaction?.followUp({content: chunks[1]?.slice(0, 2000), allowedMentions: {users: [], roles: []}});
-            else msg = await msg?.reply({content: chunks[x]?.slice(0, 2000), allowedMentions: {users: [], roles: []}});
+        if(interaction.context === 0){
+            for(let x = 0; x < chunks.length; x++){
+                if(x === 0) await deferred?.edit({content: chunks[0]?.slice(0, 2000), allowedMentions: {users: [], roles: []}});
+                else if(x === 1) msg = await interaction?.followUp({content: chunks[1]?.slice(0, 2000), allowedMentions: {users: [], roles: []}});
+                else msg = await msg?.reply({content: chunks[x]?.slice(0, 2000), allowedMentions: {users: [], roles: []}});
+            }
+        }
+        else {
+             for(let x = 0; x < chunks.length; x++){
+                if(x === 0) await deferred?.edit({content: chunks[0]?.slice(0, 2000), allowedMentions: {users: [], roles: []}});
+                else await interaction.user.send({content: chunks[x]?.slice(0, 2000), allowedMentions: {users: [], roles: []}});
+            }
         }
     },
 };
