@@ -113,7 +113,11 @@ module.exports = {
             config: {
                 systemInstruction,
                 temperature:interaction.options.getNumber("temperature") ?? 0.8,
-                tools: [{ googleSearch: {} }]
+                tools: [
+                    { googleSearch: {} },
+                    { urlContext: {} },
+                    { codeExecution: {} }
+                ]
             }
         });
 
