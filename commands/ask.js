@@ -115,8 +115,7 @@ module.exports = {
                 temperature:interaction.options.getNumber("temperature") ?? 0.8,
                 tools: [
                     { googleSearch: {} },
-                    { urlContext: {} },
-                    { codeExecution: {} }
+                    { urlContext: {} }
                 ]
             }
         });
