@@ -16,7 +16,7 @@ module.exports = {
         new SlashCommandStringOption()
         .setName("question")
         .setDescription("Ask the Secretary of State")
-        .setRequired(true)  
+        .setRequired(true)
         .setMaxLength(1000)
     )
     .addAttachmentOption(
