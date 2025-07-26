@@ -238,50 +238,50 @@ function insertCitation(str, chunkText, citation, startIndex) {
 }
 
 function splitMarkdownMessage(content, maxLength = 2000) {
-  const chunks = [];
-  let current = '';
-  let insideTripleCodeBlock = false;
-  let codeBlockLang = '';
-  let inlineCodeOpen = false;
+    const chunks = [];
+    let current = '';
+    let insideTripleCodeBlock = false;
+    let codeBlockLang = '';
+    let inlineCodeOpen = false;
 
-  const lines = content.split('\n');
+    const lines = content.split('\n');
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmedLine = line.trim();
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmedLine = line.trim();
 
-    if (trimmedLine.startsWith('```')) {
-      if (!insideTripleCodeBlock) {
-        codeBlockLang = trimmedLine.slice(3).trim();
-        insideTripleCodeBlock = true;
-      } else {
-        insideTripleCodeBlock = false;
-        codeBlockLang = '';
-      }
+        if (trimmedLine.startsWith('```')) {
+            if (!insideTripleCodeBlock) {
+            codeBlockLang = trimmedLine.slice(3).trim();
+            insideTripleCodeBlock = true;
+            } else {
+            insideTripleCodeBlock = false;
+            codeBlockLang = '';
+            }
+        }
+
+        const nextLength = current.length + line.length + 1;
+
+        if (nextLength > maxLength) {
+            if (insideTripleCodeBlock) current += '\n```';
+            chunks.push(current);
+            current = '';
+            if (insideTripleCodeBlock) current += '```' + codeBlockLang + '\n';
+        }
+
+        const backtickMatches = line.match(/`/g);
+        if (backtickMatches && backtickMatches.length % 2 !== 0) {
+            inlineCodeOpen = !inlineCodeOpen;
+        }
+
+        current += (current.length ? '\n' : '') + line;
     }
 
-    const nextLength = current.length + line.length + 1;
-
-    if (nextLength > maxLength) {
-      if (insideTripleCodeBlock) current += '\n```';
-      chunks.push(current);
-      current = '';
-      if (insideTripleCodeBlock) current += '```' + codeBlockLang + '\n';
+    if (current.length) {
+        if (insideTripleCodeBlock) current += '\n```';
+        if (inlineCodeOpen) current += '`';
+        chunks.push(current);
     }
 
-    const backtickMatches = line.match(/`/g);
-    if (backtickMatches && backtickMatches.length % 2 !== 0) {
-      inlineCodeOpen = !inlineCodeOpen;
-    }
-
-    current += (current.length ? '\n' : '') + line;
-  }
-
-  if (current.length) {
-    if (insideTripleCodeBlock) current += '\n```';
-    if (inlineCodeOpen) current += '`';
-    chunks.push(current);
-  }
-
-  return chunks;
+    return chunks;
 }
