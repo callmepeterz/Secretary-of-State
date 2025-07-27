@@ -65,7 +65,7 @@ module.exports = {
      */
     async execute(interaction, deferred){
         let attachment = interaction.options.getAttachment("file");
-        let systemPromptHeader = `Current user: ${interaction.user.displayName}, ID: ${interaction.user.id}, mentionable with <@${interaction.user.id}>; Current date and time: ${new Date().toString()}; Current status: "${interaction.client.user?.presence?.activities?.[0]?.name || interaction.client.status.description}, set at ${interaction.client.status.timeStamp?.toString()}"; Current banner: ${interaction.client.banner.description}, set at ${interaction.client.banner.timeStamp?.toString()}`;
+        let systemPromptFooter = `\n\n-----\n\nCurrent user: ${interaction.user.displayName}, ID: ${interaction.user.id}, mentionable with <@${interaction.user.id}>; Current date and time: ${new Date().toString()}; ${interaction.context === 0 ? "Currently in a public Discord server" : "Currently in the user's direct messages"}; Current status: "${interaction.client.user?.presence?.activities?.[0]?.name || interaction.client.status.description}, set at ${interaction.client.status.timeStamp?.toString()}"; Current banner: ${interaction.client.banner.description}, set at ${interaction.client.banner.timeStamp?.toString()}`;
         let prompt = interaction.options.getString("question")
         ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
         ?.replaceAll(new RegExp(setBannerRegex, "g"), "");
@@ -73,10 +73,6 @@ module.exports = {
             {
                 text: prompt,
                 role: "user"
-            },
-            {
-                text: systemPromptHeader,
-                role: "model"
             }
         ];
         let mimeType = (attachment?.contentType === "application/javascript" || attachment?.contentType === "application/javascript; charset=utf-8") ? "text/javascript" : attachment?.contentType;
@@ -111,7 +107,7 @@ module.exports = {
             model: interaction.options.getString("model") ?? "gemini-2.5-flash",
             contents,
             config: {
-                systemInstruction,
+                systemInstruction: systemInstruction + systemPromptFooter,
                 temperature:interaction.options.getNumber("temperature") ?? 0.8,
                 tools: [
                     { googleSearch: {} },
@@ -129,7 +125,7 @@ module.exports = {
         let bannerDesc = responseText.match(setBannerRegex)?.[1]?.slice(0, 128);
 
         if(status && interaction.context === 0){
-            interaction?.client?.user?.setPresence({activities: [{name: status}], status: "online"});
+            interaction?.client?.user?.setPresence({activities: [{name: status, type: 4}], status: "online"});
             console.log("Setting status to:", status);
             // handle time duraction for rate limiting 
             let currentTime = Date.now();
