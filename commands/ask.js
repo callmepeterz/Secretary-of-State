@@ -5,6 +5,8 @@ const fs = require("node:fs");
 const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString();
 const setStatusRegex = /\{\{SetStatus::(.+?)\}\}/;
 const setBannerRegex = /\{\{SetBanner::(.+?)\}\}/;
+const summarizeRegex = /\{\{Summarize::(.+?)\}\}/;
+
 const supportedFileFormats = require("../assets/geminiSupportedFileFormats.json");
 
 module.exports = {
@@ -66,9 +68,12 @@ module.exports = {
     async execute(interaction, deferred){
         let attachment = interaction.options.getAttachment("file");
         let systemPromptFooter = `\n\n-----\n\nCurrent user: ${interaction.user.displayName}, ID: ${interaction.user.id}, mentionable with <@${interaction.user.id}>; Current date and time: ${new Date().toString()}; ${interaction.context === 0 ? "Currently in a public Discord server" : "Currently in the user's direct messages"}; Current status: "${interaction.client.user?.presence?.activities?.[0]?.name || interaction.client.status.description}, set at ${interaction.client.status.timeStamp?.toString()}"; Current banner: ${interaction.client.banner.description}, set at ${interaction.client.banner.timeStamp?.toString()}`;
+        let context = "";
         let prompt = interaction.options.getString("question")
         ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
-        ?.replaceAll(new RegExp(setBannerRegex, "g"), "");
+        ?.replaceAll(new RegExp(setBannerRegex, "g"), "")
+        ?.replaceAll(new RegExp(summarizeRegex, "g"), "");
+
         let contents = [
             {
                 text: prompt,
@@ -95,6 +100,19 @@ module.exports = {
             }
             else attachment = null;
         }
+
+        let summaries = interaction.client.aiContext.summaries.get(interaction.context === 0 ? interaction.guild.id : interaction.user.id) ?? [];
+        if(summaries.length){
+            context += "\n\n-----\n\nRecent requests and responses\n";
+            for(let s of summaries) context += s + "\n";
+        }
+
+        let messages = interaction.client.aiContext.messages.get(interaction.context === 0 ? interaction.channel.id : interaction.user.id) ?? [];
+        if(messages.length){
+            context += `\n\n-----\n\nRecent messages in this channel (${interaction.context === 0 ? `#${interaction.channel.name}` : `direct messages of ${interaction.user.displayName}, ID: ${interaction.user.id}`})\n`;
+            for(let m of messages) context += m + "\n";
+        }
+
         const selectedKey = interaction.options.getInteger("key") ?? 1;
         const aiInstance = interaction.client.ai[selectedKey];
         
@@ -107,7 +125,7 @@ module.exports = {
             model: interaction.options.getString("model") ?? "gemini-2.5-flash",
             contents,
             config: {
-                systemInstruction: systemInstruction + systemPromptFooter,
+                systemInstruction: systemInstruction + systemPromptFooter + context,
                 temperature:interaction.options.getNumber("temperature") ?? 0.8,
                 tools: [
                     { googleSearch: {} },
@@ -123,6 +141,7 @@ module.exports = {
 
         let status = responseText.match(setStatusRegex)?.[1]?.slice(0, 128);
         let bannerDesc = responseText.match(setBannerRegex)?.[1]?.slice(0, 128);
+        let summary = responseText.match(summarizeRegex)?.[1]?.slice(0, 200);
 
         if(status && interaction.context === 0){
             interaction?.client?.user?.setPresence({activities: [{name: status, type: 4}], status: "online"});
@@ -155,9 +174,20 @@ module.exports = {
                 console.log("Cannot update banner. Please wait for at least 1 minute before updating again.");
             }
         }
+
+        if(summary){
+            let currentSummaries = interaction.client.aiContext.summaries.get(interaction.context === 0 ? interaction.guild.id : interaction.user.id) ?? [];
+            currentSummaries.push(`[User: ${interaction.user.displayName}, ID: ${interaction.user.id}]: ` + summary);
+            while(currentSummaries.join("\n").length > 2000) currentSummaries.shift();
+            interaction.client.aiContext.summaries.set(interaction.context === 0 ? interaction.guild.id : interaction.user.id, currentSummaries);
+        }
+
         responseText = responseText
         ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
-        ?.replaceAll(new RegExp(setBannerRegex, "g"), "");
+        ?.replaceAll(new RegExp(setBannerRegex, "g"), "")
+        ?.replaceAll(new RegExp(summarizeRegex, "g"), "");
+
+        responseText = responseText.trim();
 
         if(!responseText) responseText = "No text was returned.";
 

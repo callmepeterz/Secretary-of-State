@@ -18,7 +18,7 @@ module.exports = {
         let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let embed = new EmbedBuilder().setColor(color);
         let invites = await interaction?.guild?.invites?.fetch();
-        let invite = invites.filter(i => i.channel.name === "welcome").first() ?? invites.first();
+        let invite = invites?.filter(i => i.channel.name === "welcome").first() ?? invites?.first();
         if(!invite) return interaction?.reply({embeds: [embed.setDescription("Could not find invites!")], flags: MessageFlags.Ephemeral});
 
         embed

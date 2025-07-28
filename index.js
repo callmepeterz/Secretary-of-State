@@ -1,9 +1,9 @@
 "use strict";
 require("dotenv").config();
-const {Client, Collection} = require('discord.js');
+const {Client, Collection, Partials} = require('discord.js');
 const fs = require("node:fs");
 const path = require("node:path");
-const client = new Client({intents: [process.env.INTENTS]});
+const client = new Client({intents: JSON.parse(process.env.INTENTS), partials: JSON.parse(process.env.PARTIALS)});
 const { GoogleGenAI } = require("@google/genai");
 
 client.commands = new Collection();
@@ -24,6 +24,11 @@ client.banner = {
 client.status = {
     timeStamp: null,
     description: "Not available.",
+}
+//storing context cache
+client.aiContext = {
+    messages: new Collection(),
+    summaries: new Collection(),
 }
 
 // storing games
