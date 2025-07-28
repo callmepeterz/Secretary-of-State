@@ -103,16 +103,30 @@ module.exports = {
 
         let summaries = interaction.client.aiContext.summaries.get(interaction.context === 0 ? interaction.guild.id : interaction.user.id) ?? [];
         if(summaries.length){
-            context += "\n\n-----\n\nRecent requests and responses\n";
+            context += "\n\n-----\n\nRecent requests and responses (most recent request is at the bottom of the list)\n";
             for(let s of summaries) context += s + "\n";
         }
 
-        let messages = interaction.client.aiContext.messages.get(interaction.context === 0 ? interaction.channel.id : interaction.user.id) ?? [];
+        const channID = interaction.context === 0 ? interaction.channel.id : interaction.user.id;
+        let messages = interaction.client.aiContext.messages.get(channID) ?? [];
+        let hasAttemptedChannelFetch = interaction.client.aiContext.hasAttemptedChannelFetch.get(channID) ?? false;
+        
+        if(interaction.context === 0 && !hasAttemptedChannelFetch){
+            let fetchedMessages = await interaction?.channel.messages.fetch({limit: 50});
+            fetchedMessages.forEach(m => {
+                if(!m?.content || messages?.join("\n").length + m?.content?.length > parseInt(process.env.CONTEXT_LIMIT)) return;
+                messages.push(`[Author: ${m.author.displayName}, ID: ${m.author.id}]: ` + m.content.slice(0, m.author.bot ? 300 : 1000));
+            });
+            messages.reverse();
+            interaction.client.aiContext.messages.set(channID, messages);
+            interaction.client.aiContext.hasAttemptedChannelFetch.set(channID, true);
+        }
+        
         if(messages.length){
-            context += `\n\n-----\n\nRecent messages in this channel (${interaction.context === 0 ? `#${interaction.channel.name}` : `direct messages of ${interaction.user.displayName}, ID: ${interaction.user.id}`})\n`;
+            context += `\n\n-----\n\nRecent messages in this channel (${interaction.context === 0 ? `#${interaction.channel.name} (most recent message is at the bottom of the list)` : `direct messages of ${interaction.user.displayName}, ID: ${interaction.user.id}`})\n`;
             for(let m of messages) context += m + "\n";
         }
-
+        console.log(context);
         const selectedKey = interaction.options.getInteger("key") ?? 1;
         const aiInstance = interaction.client.ai[selectedKey];
         
@@ -178,7 +192,7 @@ module.exports = {
         if(summary){
             let currentSummaries = interaction.client.aiContext.summaries.get(interaction.context === 0 ? interaction.guild.id : interaction.user.id) ?? [];
             currentSummaries.push(`[User: ${interaction.user.displayName}, ID: ${interaction.user.id}]: ` + summary);
-            while(currentSummaries.join("\n").length > 8000) currentSummaries.shift();
+            while(currentSummaries.join("\n").length > parseInt(process.env.CONTEXT_LIMIT)) currentSummaries.shift();
             interaction.client.aiContext.summaries.set(interaction.context === 0 ? interaction.guild.id : interaction.user.id, currentSummaries);
         }
 

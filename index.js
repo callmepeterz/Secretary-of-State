@@ -29,6 +29,7 @@ client.status = {
 client.aiContext = {
     messages: new Collection(),
     summaries: new Collection(),
+    hasAttemptedChannelFetch: new Collection(),
 }
 
 // storing games
