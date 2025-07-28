@@ -10,8 +10,8 @@ module.exports = {
     async execute(message){
         if(message.author.bot || !message.content) return;
         let messages = message.client.aiContext.messages.get(message.channel.type === ChannelType.GuildText ? message.channel.id : message.author.id) ?? [];
-        messages.push(`[Author: ${message.author.displayName}, ID: ${message.author.id}]: ` + message.content.slice(0, 220));
-        while(messages.join("\n").length > 2000) messages.shift();
+        messages.push(`[Author: ${message.author.displayName}, ID: ${message.author.id}]: ` + message.content.slice(0, 1000));
+        while(messages.join("\n").length > 8000) messages.shift();
         message.client.aiContext.messages.set(message.channel.type === ChannelType.GuildText ? message.channel.id : message.author.id, messages);
     },
 };

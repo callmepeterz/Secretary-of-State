@@ -19,7 +19,7 @@ module.exports = {
         .setName("question")
         .setDescription("Ask the Secretary of State")
         .setRequired(true)
-        .setMaxLength(1000)
+        .setMaxLength(2000)
     )
     .addAttachmentOption(
         new SlashCommandAttachmentOption()
@@ -141,7 +141,7 @@ module.exports = {
 
         let status = responseText.match(setStatusRegex)?.[1]?.slice(0, 128);
         let bannerDesc = responseText.match(setBannerRegex)?.[1]?.slice(0, 128);
-        let summary = responseText.match(summarizeRegex)?.[1]?.slice(0, 200);
+        let summary = responseText.match(summarizeRegex)?.[1]?.slice(0, 512);
 
         if(status && interaction.context === 0){
             interaction?.client?.user?.setPresence({activities: [{name: status, type: 4}], status: "online"});
@@ -178,7 +178,7 @@ module.exports = {
         if(summary){
             let currentSummaries = interaction.client.aiContext.summaries.get(interaction.context === 0 ? interaction.guild.id : interaction.user.id) ?? [];
             currentSummaries.push(`[User: ${interaction.user.displayName}, ID: ${interaction.user.id}]: ` + summary);
-            while(currentSummaries.join("\n").length > 2000) currentSummaries.shift();
+            while(currentSummaries.join("\n").length > 8000) currentSummaries.shift();
             interaction.client.aiContext.summaries.set(interaction.context === 0 ? interaction.guild.id : interaction.user.id, currentSummaries);
         }
 
