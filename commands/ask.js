@@ -126,7 +126,7 @@ module.exports = {
             context += `\n\n-----\n\nRecent messages in this channel (${interaction.context === 0 ? `#${interaction.channel.name} (most recent message is at the bottom of the list)` : `direct messages of ${interaction.user.displayName}, ID: ${interaction.user.id}`})\n`;
             for(let m of messages) context += m + "\n";
         }
-        console.log(context);
+        
         const selectedKey = interaction.options.getInteger("key") ?? 1;
         const aiInstance = interaction.client.ai[selectedKey];
         
