@@ -29,6 +29,7 @@ client.status = {
 client.aiContext = {
     messages: new Collection(),
     summaries: new Collection(),
+    polls: new Collection(),
     hasAttemptedChannelFetch: new Collection(),
 }
 

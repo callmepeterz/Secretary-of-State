@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption } = require('discord.js');
+const { Collection, Poll,  SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption } = require('discord.js');
 const get = require("../util/httpsGet.js");
 const { formatMath, formatSuperscript } = require("../util/formatMath.js");
 const fs = require("node:fs");
@@ -109,22 +109,51 @@ module.exports = {
 
         const channID = interaction.context === 0 ? interaction.channel.id : interaction.user.id;
         let messages = interaction.client.aiContext.messages.get(channID) ?? [];
+        /**@type {Collection}*/
+        let polls = interaction.client.aiContext.polls.get(channID) ?? new Collection();
         let hasAttemptedChannelFetch = interaction.client.aiContext.hasAttemptedChannelFetch.get(channID) ?? false;
         
         if(interaction.context === 0 && !hasAttemptedChannelFetch){
             let fetchedMessages = await interaction?.channel.messages.fetch({limit: 50});
-            fetchedMessages.forEach(m => {
-                if(!m?.content || messages?.join("\n").length + m?.content?.length > parseInt(process.env.CONTEXT_LIMIT)) return;
+            for (let [_, m] of fetchedMessages)  {
+                if(m.poll){
+                    let poll = {
+                        author: {name: m.author.displayName, id: m.author.id},
+                        question: m.poll.question.text,
+                        answers: {}
+                    }
+                    for(let [__, a] of m.poll.answers){
+                        let answer = {
+                            text: a.text,
+                        }
+                        let votedUsers = await a.fetchVoters();
+                        answer.voters = votedUsers.map(v => v.id) ?? [];
+                        poll.answers[a.id] = answer;
+                    }
+                    polls.set(m.id, poll);
+                }
+
+                if(!m?.content || messages?.join("\n").length + m?.content?.length > parseInt(process.env.CONTEXT_LIMIT)) continue;
                 messages.push(`[Author: ${m.author.displayName}, ID: ${m.author.id}]: ` + m.content.slice(0, m.author.bot ? 300 : 1000));
-            });
+            }
             messages.reverse();
+            polls.reverse();
+
+            while(polls.map(pollString).join("\n").length > parseInt(process.env.CONTEXT_LIMIT)) polls.delete(polls.firstKey());
+            
             interaction.client.aiContext.messages.set(channID, messages);
+            interaction.client.aiContext.polls.set(channID, polls);
             interaction.client.aiContext.hasAttemptedChannelFetch.set(channID, true);
         }
         
         if(messages.length){
-            context += `\n\n-----\n\nRecent messages in this channel (${interaction.context === 0 ? `#${interaction.channel.name} (most recent message is at the bottom of the list)` : `direct messages of ${interaction.user.displayName}, ID: ${interaction.user.id}`})\n`;
+            context += `\n\n-----\n\nRecent messages in this channel (${interaction.context === 0 ? `#${interaction.channel.name}` : `direct messages of ${interaction.user.displayName}, ID: ${interaction.user.id}`}) (most recent message is at the bottom of the list)\n`;
             for(let m of messages) context += m + "\n";
+        }
+
+        if(polls.size){
+            context += `\n\n-----\n\nRecent polls in this channel (most recent poll is at the bottom of the list)\n`;
+            for(let [_, p] of polls) context += pollString(p);
         }
         
         const selectedKey = interaction.options.getInteger("key") ?? 1;
@@ -223,6 +252,12 @@ module.exports = {
         }
     },
 };
+
+function pollString(p){
+    let s = `[Author: ${p.author.name}, ID: ${p.author.id}]: ${p.question}\n`;
+    Object.values(p.answers).forEach(a => {s += `- ${a.text} (${a.voters.length} votes) (voters: ${a.voters.join(", ")})\n`});
+    return s;
+}
 
 function addCitations(response) {
     let text = response?.text;
