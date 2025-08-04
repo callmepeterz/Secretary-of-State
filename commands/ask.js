@@ -1,4 +1,4 @@
-const { Collection, Poll,  SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption } = require('discord.js');
+const { Collection,  SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption } = require('discord.js');
 const get = require("../util/httpsGet.js");
 const { formatMath, formatSuperscript } = require("../util/formatMath.js");
 const fs = require("node:fs");
@@ -109,7 +109,6 @@ module.exports = {
 
         const channID = interaction.context === 0 ? interaction.channel.id : interaction.user.id;
         let messages = interaction.client.aiContext.messages.get(channID) ?? [];
-        /**@type {Collection}*/
         let polls = interaction.client.aiContext.polls.get(channID) ?? new Collection();
         let hasAttemptedChannelFetch = interaction.client.aiContext.hasAttemptedChannelFetch.get(channID) ?? false;
         
