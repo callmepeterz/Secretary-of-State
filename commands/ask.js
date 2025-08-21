@@ -233,6 +233,11 @@ module.exports = {
 
         if(!responseText) responseText = "No text was returned.";
 
+        messages = interaction.client.aiContext.messages.get(channID) ?? [];
+        messages.push(`[Request from ${interaction.user.displayName} (ID: ${interaction.user.id}); prompt: "${prompt.slice(0, 300)}"; your response: ${responseText.slice(0, 300)}]`);
+        while(messages.join("\n").length > parseInt(process.env.CONTEXT_LIMIT)) messages.shift();
+        interaction.client.aiContext.messages.set(channID, messages);
+
         const chunks = splitMarkdownMessage(responseText)?.filter(Boolean);
         let msg;
 
