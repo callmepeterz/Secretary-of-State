@@ -101,6 +101,12 @@ module.exports = {
             else attachment = null;
         }
 
+        let userData = interaction.client.userData
+        context += "\n\n-----\n\nKnown preferred pronouns of users (default to they/them for unknown users)\n";
+        for(let u in userData){
+            context += `${u}: ${userData[u]?.pronouns}\n`;
+        }
+
         let summaries = interaction.client.aiContext.summaries.get(interaction.context === 0 ? interaction.guild.id : interaction.user.id) ?? [];
         if(summaries.length){
             context += "\n\n-----\n\nRecent requests and responses (most recent request is at the bottom of the list)\n";

@@ -119,6 +119,9 @@ Thumbs.db
 # Old commands
 commands_old/
 
+# Data
+data/
+
 # Template files
 \!template
 

@@ -25,7 +25,7 @@ client.status = {
     timeStamp: null,
     description: "Not available.",
 }
-//storing context cache
+// storing context cache
 client.aiContext = {
     messages: new Collection(),
     summaries: new Collection(),
@@ -37,6 +37,10 @@ client.aiContext = {
 client.games = {};
 client.games.chess = new Collection();
 
+// storing user data
+client.userData = {};
+
+// load commands
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file=>file.endsWith(".js"));
 
@@ -50,6 +54,7 @@ for (const file of commandFiles) {
     }
 }
 
+// load events
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
@@ -61,6 +66,16 @@ for (const file of eventFiles) {
 	} else {
 		client.on(event.name, (...args) => event.execute(...args));
 	}
+}
+
+// load user data
+const userDataPath = path.join(__dirname, 'data/users');
+const userDataFiles = fs.readdirSync(userDataPath).filter(file=>file.endsWith(".json"));
+
+for (const file of userDataFiles) {
+    const filePath = path.join(userDataPath, file);
+    const user = require(filePath);
+    client.userData[user.id] = user;
 }
 
 client.login(process.env.TOKEN);
