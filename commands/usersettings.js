@@ -84,7 +84,7 @@ module.exports = {
 
         let userData = interaction.client.userData[interaction.user.id];
         if(!userData) {
-            userData = userTemplate;
+            userData = JSON.parse(JSON.stringify(userTemplate));
             userData.id = interaction.user.id;
         }
 
