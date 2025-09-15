@@ -90,14 +90,12 @@ module.exports = {
             new SlashCommandStringOption()
             .setName("bank")
             .setDescription("Name of the bank")
-            .setRequired(true)
             .setAutocomplete(true)
         )
         .addStringOption(
             new SlashCommandStringOption()
             .setName("account")
             .setDescription("Account number or alias")
-            .setRequired(true)
             .setMaxLength(19)
         )
         .addIntegerOption(
@@ -137,6 +135,7 @@ module.exports = {
         let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let qrColor = interaction.options.getString("color")?.match(colorRegex)?.[1] ?? "000";
         let bgColor = interaction.options.getString("bgcolor")?.match(colorRegex)?.[1] ?? "fff";
+        let userData = interaction.client.userData[interaction.user.id];
 
         let embed = new EmbedBuilder().setColor(color);
         switch(interaction.options.getSubcommand()){
@@ -147,10 +146,12 @@ module.exports = {
                 embed.setImage(`http://api.qrserver.com/v1/create-qr-code/?data=${encodeURL(`WIFI:S:${interaction.options.getString("ssid")};T:${interaction.options.getString("password") ? (interaction.options.getString("encryption") ?? "WPA") : "nopass"};P:${interaction.options.getString("password") ?? ""};H:${interaction.options.getBoolean("hidden") ? "true" : "false"};;`)}&size=300x300&qzone=1&color=${qrColor}&bgcolor=${bgColor}`);
                 break;
             case "bank":
-                let bank = interaction.options.getString("bank");
+                let bank = interaction.options.getString("bank") ?? userData?.bankAccount?.bankId;
+                let account = interaction.options.getString("account") ?? userData?.bankAccount?.number;
+                if(!bank || !account) return interaction?.reply({embeds: [embed.setDescription("Bank account details not found!")], flags: MessageFlags.Ephemeral});
                 if(!banks.find(b=>b.value===bank)) bank = banks.find(b=>b.name.toLowerCase().includes(bank.toLowerCase()))?.value;
                 if(!bank) return interaction?.reply({embeds: [embed.setDescription("Bank not found!")], flags: MessageFlags.Ephemeral});
-                embed.setImage(`https://img.vietqr.io/image/${bank}-${interaction.options.getString("account")}-${interaction.options.getBoolean("full") ? "print" : "qr_only"}.png?amount=${interaction.options.getInteger("amount") ?? ""}&addInfo=${encodeURL(interaction.options.getString("description") ?? "")}&accountName=${encodeURL(interaction.options.getString("accountname") ?? "")}`);
+                embed.setImage(`https://img.vietqr.io/image/${bank}-${account}-${interaction.options.getBoolean("full") ? "print" : "qr_only"}.png?amount=${interaction.options.getInteger("amount") ?? ""}&addInfo=${encodeURL(interaction.options.getString("description") ?? "")}&accountName=${encodeURL(interaction.options.getString("accountname") ?? "")}`);
                 break;
         }
         interaction?.reply({embeds: [embed]});
