@@ -20,7 +20,8 @@ module.exports = {
             .setRequired(true)
             .setMaxLength(40)
         )
-    )    .addSubcommand(
+    )
+    .addSubcommand(
         new SlashCommandSubcommandBuilder()
         .setName("bank")
         .setDescription("Set your bank account details")
