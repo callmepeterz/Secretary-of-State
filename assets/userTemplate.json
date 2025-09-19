@@ -1,8 +1,8 @@
 {
     "id": "",
-    "pronouns": "",
+    "pronouns": null,
     "bankAccount": {
-        "bankId": "",
-        "number": ""
+        "bankId": null,
+        "number": null
     }
 }

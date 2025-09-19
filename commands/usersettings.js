@@ -91,7 +91,7 @@ module.exports = {
 
         switch(interaction.options.getSubcommand()){
             case "pronouns":
-                userData.pronouns = interaction.options.getString("pronouns") ?? "";
+                userData.pronouns = interaction.options.getString("pronouns") ?? null;
                 interaction.reply({embeds: [embed.setDescription(`Your preferred pronouns have been updated to \`${userData.pronouns}\`.`)], flags: MessageFlags.Ephemeral});
                 break;
             case "bank":
@@ -109,12 +109,12 @@ module.exports = {
             case "clear":
                 switch(interaction.options.getString("setting")){
                     case "pronouns":
-                        userData.pronouns = "";
+                        userData.pronouns = null;
                         text = "Your preferred pronouns have been removed.";
                         break;
                     case "bank":
-                        userData.bankAccount.bankId = "";
-                        userData.bankAccount.number = "";
+                        userData.bankAccount.bankId = null;
+                        userData.bankAccount.number = null;
                         text = "Your bank account details have been removed";
                         break;
                 }
