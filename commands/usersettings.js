@@ -102,6 +102,7 @@ module.exports = {
                 interaction.reply({embeds: [embed.setDescription(`Your preferred pronouns have been updated to \`${userData.pronouns}\`.`)], flags: MessageFlags.Ephemeral});
                 break;
             case "bank":
+                if(interaction.context !== 0) return interaction?.reply({embeds: [embed.setDescription("Please use this command in the server. Your information will not be shown publicly, like this message.")], flags: MessageFlags.Ephemeral});
                 if(!interaction.member.roles.cache.hasAny(process.env.CITIZEN_ROLE_ID)) return interaction?.reply({embeds: [embed.setDescription("Feature only available to citizens!")], flags: MessageFlags.Ephemeral});
                 let bank = interaction.options.getString("bank");
                 if(!banks.find(b=>b.value===bank)) bank = banks.find(b=>b.name.toLowerCase().includes(bank.toLowerCase()))?.value;
