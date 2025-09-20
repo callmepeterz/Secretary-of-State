@@ -39,6 +39,13 @@ module.exports = {
             .setMaxLength(19)
             .setRequired(true)
         )
+        .addStringOption(
+            new SlashCommandStringOption()
+            .setName("accountname")
+            .setDescription("Name of holder of the account")
+            .setMaxLength(30)
+            .setRequired(true)
+        )
     )
     .addSubcommand(
         new SlashCommandSubcommandBuilder()
@@ -95,6 +102,7 @@ module.exports = {
                 interaction.reply({embeds: [embed.setDescription(`Your preferred pronouns have been updated to \`${userData.pronouns}\`.`)], flags: MessageFlags.Ephemeral});
                 break;
             case "bank":
+                if(!interaction.member.roles.cache.hasAny(process.env.CITIZEN_ROLE_ID)) return interaction?.reply({embeds: [embed.setDescription("Feature only available to citizens!")], flags: MessageFlags.Ephemeral});
                 let bank = interaction.options.getString("bank");
                 if(!banks.find(b=>b.value===bank)) bank = banks.find(b=>b.name.toLowerCase().includes(bank.toLowerCase()))?.value;
                 if(!bank) return interaction?.reply({embeds: [embed.setDescription("Bank not found!")], flags: MessageFlags.Ephemeral});
@@ -102,7 +110,8 @@ module.exports = {
                 
                 userData.bankAccount.bankId = bank;
                 userData.bankAccount.number = interaction.options.getString("account");
-                interaction.reply({embeds: [embed.setDescription(`Your bank account details have been updated to:\n\`\`\`\nBank: ${bankName}\nAccount: ${userData.bankAccount.number}\`\`\``)], flags: MessageFlags.Ephemeral});
+                userData.bankAccount.name = interaction.options.getString("accountname").toUpperCase();
+                interaction.reply({embeds: [embed.setDescription(`Your bank account details have been updated to:\n\`\`\`\nBank: ${bankName}\nAccount: ${userData.bankAccount.number}\nName: ${userData.bankAccount.name}\`\`\``)], flags: MessageFlags.Ephemeral});
                 break;
 
 
@@ -115,6 +124,7 @@ module.exports = {
                     case "bank":
                         userData.bankAccount.bankId = null;
                         userData.bankAccount.number = null;
+                        userData.bankAccount.clear = null;
                         text = "Your bank account details have been removed";
                         break;
                 }
@@ -127,7 +137,7 @@ module.exports = {
                         break;
                     case "bank":
                         let bankName = banks.find(b=>b.value===userData.bankAccount.bankId)?.name;
-                        text = (userData.bankAccount.bankId && userData.bankAccount.number) ? `Your bank account details:\n\`\`\`\nBank: ${bankName}\nAccount: ${userData.bankAccount.number}\`\`\`` : "You have not updated your bank account details.";
+                        text = (userData.bankAccount.bankId && userData.bankAccount.number) ? `Your bank account details:\n\`\`\`\nBank: ${bankName}\nAccount: ${userData.bankAccount.number}\nName: ${userData.bankAccount.name}\`\`\`` : "You have not updated your bank account details.";
                         break;
                 }
                 return interaction.reply({embeds: [embed.setDescription(text)], flags: MessageFlags.Ephemeral});

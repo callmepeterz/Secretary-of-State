@@ -3,6 +3,7 @@
     "pronouns": null,
     "bankAccount": {
         "bankId": null,
-        "number": null
+        "number": null,
+        "name": null
     }
 }
