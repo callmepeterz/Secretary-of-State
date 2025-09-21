@@ -1,4 +1,4 @@
-const { AutocompleteInteraction, Message, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandUserOption, SlashCommandStringOption, SlashCommandBooleanOption, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, MessageFlags, ButtonBuilder, ButtonStyle, ActionRowBuilder, AttachmentBuilder } = require('discord.js');
+const { AutocompleteInteraction, Message, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandUserOption, SlashCommandStringOption, SlashCommandBooleanOption, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, MessageFlags, ButtonBuilder, ButtonStyle, ActionRowBuilder, AttachmentBuilder, InteractionContextType } = require('discord.js');
 const { Chess, Move } = require("chess.js");
 const get = require("../util/httpsGet.js");
 const encode = require("../util/encodeURL.js");
@@ -8,6 +8,7 @@ module.exports = {
     .setName("chess")
     .setDescription("Play chess against another player or Stockfish.")
     .setNSFW(false)
+    .setContexts(InteractionContextType.Guild)
     .addSubcommand(
         new SlashCommandSubcommandBuilder()
         .setName("start")
@@ -57,8 +58,6 @@ module.exports = {
     async execute(interaction, deferred){
         let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let embed = new EmbedBuilder().setColor(color);
-
-        if(interaction.context !== 0) return interaction.reply({embeds: [embed.setDescription("You can only use `/chess` in a server!")], flags: MessageFlags.Ephemeral});
 
         let move = interaction.options.getString("move");
         let currentPlayer = interaction.user;

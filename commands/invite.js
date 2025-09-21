@@ -1,11 +1,12 @@
-const { SlashCommandBuilder, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, MessageFlags, InteractionContextType } = require('discord.js');
 const encodeURL = require("../util/encodeURL");
 
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("invite")
     .setDescription("Sends an invite to the server")
-    .setNSFW(false),
+    .setNSFW(false)
+    .setContexts(InteractionContextType.Guild),
     index: "Tool",
     isDeferred: false,
     cooldown: 1000,

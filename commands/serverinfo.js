@@ -1,10 +1,11 @@
-const { SlashCommandBuilder, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, InteractionContextType } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("serverinfo")
     .setDescription("Shows info of this server")
-    .setNSFW(false),
+    .setNSFW(false)
+    .setContexts(InteractionContextType.Guild),
     index: "Tool",
     isDeferred: false,
     cooldown: 1000,
@@ -17,7 +18,6 @@ module.exports = {
         let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let embed = new EmbedBuilder().setColor(color);
         let guild = interaction?.guild;
-        if(!guild) return interaction.reply({embeds: [embed.setDescription("Only available in a server!")], flags: MessageFlags.Ephemeral});
         embed
         .setTitle(guild.name)
         .setThumbnail(guild.iconURL({size: 1024}))
