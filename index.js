@@ -27,6 +27,7 @@ client.status = {
 }
 // storing context cache
 client.aiContext = {
+    systemInstruction: fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString(),
     messages: new Collection(),
     summaries: new Collection(),
     polls: new Collection(),

@@ -2,7 +2,6 @@ const { Collection,  SlashCommandBuilder, SlashCommandStringOption, SlashCommand
 const get = require("../util/httpsGet.js");
 const { formatMath, formatSuperscript } = require("../util/formatMath.js");
 const fs = require("node:fs");
-const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString();
 const setStatusRegex = /\{\{SetStatus::(.+?)\}\}/;
 const setBannerRegex = /\{\{SetBanner::(.+?)\}\}/;
 const summarizeRegex = /\{\{Summarize::(.+?)\}\}/;
@@ -66,6 +65,7 @@ module.exports = {
      * @param {InteractionResponse} deferred
      */
     async execute(interaction, deferred){
+        const systemInstruction = interaction.client.aiContext.systemInstruction;
         let attachment = interaction.options.getAttachment("file");
         let systemPromptFooter = `\n\n-----\n\nCurrent user: ${interaction.user.displayName}, ID: ${interaction.user.id}, mentionable with <@${interaction.user.id}>; Current date and time: ${new Date().toString()}; ${interaction.context === 0 ? "Currently in a public Discord server" : "Currently in the user's direct messages"}; Current status: "${interaction.client.user?.presence?.activities?.[0]?.name || interaction.client.status.description}, set at ${interaction.client.status.timeStamp?.toString()}"; Current banner: ${interaction.client.banner.description}, set at ${interaction.client.banner.timeStamp?.toString()}`;
         let context = "";
