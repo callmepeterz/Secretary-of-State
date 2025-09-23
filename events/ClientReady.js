@@ -1,7 +1,7 @@
 const { Events, Client } = require('discord.js');
 const get = require("../util/httpsGet.js");
 const fs = require("node:fs");
-const systemInstruction = fs.readFileSync("./assets/systemPrompt.txt", "utf-8").toString();
+const path = require("node:path");
 
 module.exports = {
 	name: Events.ClientReady,
@@ -11,8 +11,14 @@ module.exports = {
 	 * @param {Client} client 
 	 */
 	async execute(client) {
+		const systemInstruction = client.aiContext.systemInstruction;
+
 		console.log("fuck u");
 		console.log(`Logged in as ${client.user.tag}`);
+
+		if(client.status.description) interaction?.client?.user?.setPresence({activities: [{name: client.status.description, type: 4}], status: "online"});
+
+		if(client.banner.description) return;
 
 		let bannerurl = (await client?.user?.fetch()).bannerURL({size: 1024});
 		if (!bannerurl) return console.log("Banner URL not available");
@@ -41,6 +47,7 @@ module.exports = {
 		}).catch(err=>console.error(err));
 
 		client.banner.description = response?.text;
+		fs.writeFileSync(path.join(process.cwd(), "data/bot/banner.txt"), client.banner.description);
 		console.log("Banner detected: " + client.banner.description);
 	},
 };

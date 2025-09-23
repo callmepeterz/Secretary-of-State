@@ -2,6 +2,7 @@ const { Collection,  SlashCommandBuilder, SlashCommandStringOption, SlashCommand
 const get = require("../util/httpsGet.js");
 const { formatMath, formatSuperscript } = require("../util/formatMath.js");
 const fs = require("node:fs");
+const path = require("node:path");
 const setStatusRegex = /\{\{SetStatus::(.+?)\}\}/;
 const setBannerRegex = /\{\{SetBanner::(.+?)\}\}/;
 const summarizeRegex = /\{\{Summarize::(.+?)\}\}/;
@@ -209,6 +210,7 @@ module.exports = {
             interaction.client.status.timeStamp = currentTime; 
             // set the new status description
             interaction.client.status.description = status;
+            fs.writeFileSync(path.join(process.cwd(), "data/bot/status.txt"), status);
         }
 
         if (bannerDesc && attachment && mimeType?.startsWith("image/") && interaction.context === 0) {
@@ -225,6 +227,7 @@ module.exports = {
                         interaction.client.banner.timeStamp = currentTime; 
                         // set the new banner description
                         interaction.client.banner.description = bannerDesc;
+                        fs.writeFileSync(path.join(process.cwd(), "data/bot/banner.txt"), bannerDesc);
                     })
                     .catch(err => console.error("Failed to update banner:", err));
             } else {

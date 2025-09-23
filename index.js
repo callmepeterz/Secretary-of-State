@@ -18,12 +18,12 @@ client.ai = {
 // storing banner description
 client.banner = {
     timeStamp: null,
-    description: "Not available.",
+    description: fs.readFileSync("./data/bot/banner.txt", "utf-8")?.toString() ?? null,
 }
 // storing status stuffs
 client.status = {
     timeStamp: null,
-    description: "Not available.",
+    description: fs.readFileSync("./data/bot/status.txt", "utf-8")?.toString() ?? null,
 }
 // storing context cache
 client.aiContext = {
