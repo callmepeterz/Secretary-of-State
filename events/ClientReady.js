@@ -1,4 +1,4 @@
-const { Events, Client } = require('discord.js');
+const { Events, Client, PresenceUpdateStatus } = require('discord.js');
 const get = require("../util/httpsGet.js");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -16,7 +16,7 @@ module.exports = {
 		console.log("fuck u");
 		console.log(`Logged in as ${client.user.tag}`);
 
-		if(client.status.description) interaction?.client?.user?.setPresence({activities: [{name: client.status.description, type: 4}], status: "online"});
+		if(client.status.description) client?.user?.setPresence({activities: [{name: client.status.description, type: 4}], status: getUpdateStatus()});
 
 		if(client.banner.description) return;
 
@@ -51,3 +51,10 @@ module.exports = {
 		console.log("Banner detected: " + client.banner.description);
 	},
 };
+
+function getUpdateStatus() {
+	let date = new Date(Date.now() + (parseFloat(process.env.UTC_OFFSET) * 3600000));
+	if(date.getDay() === 0 || date.getDay() === 6) return PresenceUpdateStatus.Idle;
+	if(date.getDay() === 1) return PresenceUpdateStatus.DoNotDisturb;
+	return PresenceUpdateStatus.Online;
+}

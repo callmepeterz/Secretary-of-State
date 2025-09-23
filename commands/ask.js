@@ -1,4 +1,4 @@
-const { Collection,  SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ApplicationCommandOptionType, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption } = require('discord.js');
+const { Collection,  SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ApplicationCommandOptionType, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption, PresenceUpdateStatus } = require('discord.js');
 const get = require("../util/httpsGet.js");
 const { formatMath, formatSuperscript } = require("../util/formatMath.js");
 const fs = require("node:fs");
@@ -202,7 +202,7 @@ module.exports = {
         let summary = responseText.match(summarizeRegex)?.[1]?.slice(0, 512);
 
         if(status && interaction.context === 0){
-            interaction?.client?.user?.setPresence({activities: [{name: status, type: 4}], status: "online"});
+            interaction?.client?.user?.setPresence({activities: [{name: status, type: 4}], status: getUpdateStatus()});
             console.log("Setting status to:", status);
             // handle time duraction for rate limiting 
             let currentTime = Date.now();
@@ -384,4 +384,11 @@ function splitMarkdownMessage(content, maxLength = 2000) {
     }
 
     return chunks;
+}
+
+function getUpdateStatus() {
+	let date = new Date(Date.now() + (parseFloat(process.env.UTC_OFFSET) * 3600000));
+	if(date.getDay() === 0 || date.getDay() === 6) return PresenceUpdateStatus.Idle;
+	if(date.getDay() === 1) return PresenceUpdateStatus.DoNotDisturb;
+	return PresenceUpdateStatus.Online;
 }
