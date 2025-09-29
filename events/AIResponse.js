@@ -19,7 +19,7 @@ module.exports = {
      */
      async execute(message){
         if(!message.mentions.has(message.client.user.id) || !message.content || message.author.bot) return;
-        if(Date.now() - message.client.aiContext.lastCalled[message.author.id] < 5000) return;
+        if(Date.now() - message.client.aiContext.lastCalled[message.author.id] < 15000) return;
         message.client.aiContext.lastCalled[message.author.id] = Date.now();
 
         const systemInstruction = message.client.aiContext.systemInstruction;
