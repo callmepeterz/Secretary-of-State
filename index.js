@@ -32,6 +32,7 @@ client.aiContext = {
     summaries: new Collection(),
     polls: new Collection(),
     hasAttemptedChannelFetch: new Collection(),
+    lastCalled: {},
 }
 
 // storing games
