@@ -19,7 +19,11 @@ module.exports = {
      */
      async execute(message){
         if(!message.mentions.has(message.client.user.id) || !message.content || message.author.bot) return;
-        if(Date.now() - message.client.aiContext.lastCalled[message.author.id] < 15000) return;
+        if(Date.now() - message.client.aiContext.lastCalled[message.author.id] < 10000){
+            let msg = await message.channel.send(`<@${message.author.id}> You are on a cooldown, try again in <t:${Math.round((message.client.aiContext.lastCalled[message.author.id] + 15000) / 1000)}:R>`).catch(()=>{});
+            if(msg) setTimeout(()=>msg.delete().catch(()=>{}), 3000);
+            return;
+        }
         message.client.aiContext.lastCalled[message.author.id] = Date.now();
 
         const systemInstruction = message.client.aiContext.systemInstruction;
@@ -56,6 +60,12 @@ module.exports = {
                 );
             }
             else attachment = null;
+        }
+
+        let repliedID = message.reference?.messageId;
+        if(repliedID){
+            let repliedMsg = await message.channel.messages.fetch(repliedID);
+            contents[0].text = `[Replying to ${repliedMsg?.author?.displayName} (ID: ${repliedMsg?.author?.id}): ${repliedMsg?.content}]\n` + prompt;
         }
 
         let userData = message.client.userData
