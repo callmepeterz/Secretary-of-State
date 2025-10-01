@@ -70,7 +70,10 @@ module.exports = {
             contents[0].text = `[Replying to ${repliedMsg?.author?.displayName} (ID: ${repliedMsg?.author?.id}): ${repliedMsg?.content}]\n` + prompt;
         }
 
-        let userData = message.client.userData
+        let userData = message.client.userData;
+
+        if(userData[message.author.id]?.customInstruction) context += "\n\n-----\n\nThis user's custom instruction for you\n" + userData[message.author.id]?.customInstruction;
+
         context += "\n\n-----\n\nKnown preferred pronouns of users (default to they/them for unknown users)\n";
         for(let u in userData){
             context += `${u}: ${userData[u]?.pronouns}\n`;

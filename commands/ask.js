@@ -102,7 +102,10 @@ module.exports = {
             else attachment = null;
         }
 
-        let userData = interaction.client.userData
+        let userData = interaction.client.userData;
+
+        if(userData[interaction.user.id]?.customInstruction) context += "\n\n-----\n\nThis user's custom instruction for you\n" + userData[interaction.user.id]?.customInstruction;
+
         context += "\n\n-----\n\nKnown preferred pronouns of users (default to they/them for unknown users)\n";
         for(let u in userData){
             context += `${u}: ${userData[u]?.pronouns}\n`;

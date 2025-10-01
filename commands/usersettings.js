@@ -23,6 +23,18 @@ module.exports = {
     )
     .addSubcommand(
         new SlashCommandSubcommandBuilder()
+        .setName("custominstruction")
+        .setDescription("Set your custom instruction (nicknames, behavior, personal facts, etc.) for interactions with the AI")
+        .addStringOption(
+            new SlashCommandStringOption()
+            .setName("custominstruction")
+            .setDescription("The instruction to be set")
+            .setRequired(true)
+            .setMaxLength(1000)
+        )
+    )
+    .addSubcommand(
+        new SlashCommandSubcommandBuilder()
         .setName("bank")
         .setDescription("Set your bank account details")
         .addStringOption(
@@ -58,7 +70,8 @@ module.exports = {
             .setRequired(true)
             .setChoices(
                 {name: "Pronouns", value: "pronouns"},
-                {name: "Bank account details", value: "bank"}
+                {name: "Bank account details", value: "bank"},
+                {name: "AI custom instruction", value: "custominstruction"}
             )
         )
     )
@@ -73,7 +86,8 @@ module.exports = {
             .setRequired(true)
             .setChoices(
                 {name: "Pronouns", value: "pronouns"},
-                {name: "Bank account details", value: "bank"}
+                {name: "Bank account details", value: "bank"},
+                {name: "AI custom instruction", value: "custominstruction"}
             )
         )
     ),
@@ -101,6 +115,12 @@ module.exports = {
                 userData.pronouns = interaction.options.getString("pronouns") ?? null;
                 interaction.reply({embeds: [embed.setDescription(`Your preferred pronouns have been updated to \`${userData.pronouns}\`.`)], flags: MessageFlags.Ephemeral});
                 break;
+
+            case "custominstruction":
+                userData.customInstruction = interaction.options.getString("custominstruction") ?? null;
+                interaction.reply({embeds: [embed.setDescription(`Your user-specific custom instruction have been updated to \n\`\`\`\n${userData.customInstruction}\n\`\`\``)], flags: MessageFlags.Ephemeral});
+                break;
+            
             case "bank":
                 if(interaction.context !== 0) return interaction?.reply({embeds: [embed.setDescription("Please use this command in the server. Your information will not be shown publicly, like this message.")], flags: MessageFlags.Ephemeral});
                 if(!interaction.member.roles.cache.hasAny(process.env.CITIZEN_ROLE_ID)) return interaction?.reply({embeds: [embed.setDescription("Feature only available to citizens!")], flags: MessageFlags.Ephemeral});
@@ -122,6 +142,10 @@ module.exports = {
                         userData.pronouns = null;
                         text = "Your preferred pronouns have been removed.";
                         break;
+                    case "custominstruction":
+                        userData.customInstruction = null;
+                        text = "Your custom instruction has been removed.";
+                        break;
                     case "bank":
                         userData.bankAccount.bankId = null;
                         userData.bankAccount.number = null;
@@ -135,6 +159,9 @@ module.exports = {
                 switch(interaction.options.getString("setting")){
                     case "pronouns":
                         text = userData.pronouns ? `Your preferred pronouns are \`${userData.pronouns}\`.` : "You have not set your preferred pronouns.";
+                        break;
+                    case "custominstruction":
+                        text = userData.customInstruction ? `Your user-specific custom instruction is \n\`\`\`\n${userData.customInstruction}\n\`\`\`` : "You have not set your custom instruction.";
                         break;
                     case "bank":
                         let bankName = banks.find(b=>b.value===userData.bankAccount.bankId)?.name;

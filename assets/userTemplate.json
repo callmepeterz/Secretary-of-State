@@ -1,6 +1,7 @@
 {
     "id": "",
     "pronouns": null,
+    "customInstruction": null,
     "bankAccount": {
         "bankId": null,
         "number": null,
