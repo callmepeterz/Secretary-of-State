@@ -72,7 +72,7 @@ module.exports = {
 
         let userData = message.client.userData;
 
-        if(userData[message.author.id]?.customInstruction) context += "\n\n-----\n\nThis user's custom instruction for you\n" + userData[message.author.id]?.customInstruction;
+        context += "\n\n-----\n\nThis user's custom instruction for you\n" + (userData[message.author.id]?.customInstruction ?? "None");
 
         context += "\n\n-----\n\nKnown preferred pronouns of users (default to they/them for unknown users)\n";
         for(let u in userData){
