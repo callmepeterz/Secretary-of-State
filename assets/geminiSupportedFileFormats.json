@@ -33,5 +33,6 @@
   "application/json",
   "text/xml",
   "application/rtf",
-  "text/rtf"
+  "text/rtf",
+  "application/pdf"
 ]
