@@ -78,7 +78,7 @@ module.exports = {
             let userData = message.client.userData;
 
             //custom instruction
-            systemPromptFooter += "\n\n-----\n\nThis user's custom instruction for you\n" + (userData[message.author.id]?.customInstruction ?? "None");
+            context += "\n\n-----\n\nThis user's custom instruction for you\n" + (userData[message.author.id]?.customInstruction ?? "None");
 
             //pronouns
             context += "\n\n-----\n\nKnown preferred pronouns of users (default to they/them for unknown users)\n";
@@ -87,12 +87,12 @@ module.exports = {
             }
 
             //bot's discord slash commands
-            context += "\n\n-----\n\nSlash commands of the Discord user client you are operating through which users may use (/ indicates commands, indent indicates subcommands of the preceding command)\n";
+            systemPromptFooter += "\n\n-----\n\nSlash commands of the Discord user client you are operating through which users may use (/ indicates commands, indent indicates subcommands of the preceding command)\n";
             for(let [_, command] of message.client.commands){
-                context += `/${command.data.name}: ${command.data.description}\n`;
+                systemPromptFooter += `/${command.data.name}: ${command.data.description}\n`;
                 for(let subcommand of command.data.options.filter(o => o.toJSON().type === ApplicationCommandOptionType.Subcommand)){
                     let subcommandjson = subcommand.toJSON();
-                    context += `    ${subcommandjson.name}: ${subcommandjson.description}\n`;
+                    systemPromptFooter += `    ${subcommandjson.name}: ${subcommandjson.description}\n`;
                 }
             }
 
@@ -163,12 +163,14 @@ module.exports = {
                 return;
             }
 
+            contents[0].text += context;
+
             //send request to AI API
             const response = await aiInstance.models.generateContent({
                 model: "gemini-2.5-flash",
                 contents,
                 config: {
-                    systemInstruction: systemInstruction + systemPromptFooter + context,
+                    systemInstruction: systemInstruction + systemPromptFooter,
                     temperature: 0.8,
                     tools: [
                         { googleSearch: {} },

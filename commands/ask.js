@@ -109,7 +109,7 @@ module.exports = {
         let userData = interaction.client.userData;
 
         //custom instruction
-        systemPromptFooter += "\n\n-----\n\nThis user's custom instruction for you\n" + (userData[interaction.user.id]?.customInstruction ?? "None");
+        context += "\n\n-----\n\nThis user's custom instruction for you\n" + (userData[interaction.user.id]?.customInstruction ?? "None");
 
         //pronouns
         context += "\n\n-----\n\nKnown preferred pronouns of users (default to they/them for unknown users)\n";
@@ -118,12 +118,12 @@ module.exports = {
         }
 
         //bot's discord slash commands
-        context += "\n\n-----\n\nSlash commands of the Discord user client you are operating through which users may use (/ indicates commands, indent indicates subcommands of the preceding command)\n";
+        systemPromptFooter += "\n\n-----\n\nSlash commands of the Discord user client you are operating through which users may use (/ indicates commands, indent indicates subcommands of the preceding command)\n";
         for(let [_, command] of interaction.client.commands){
-            context += `/${command.data.name}: ${command.data.description}\n`;
+            systemPromptFooter += `/${command.data.name}: ${command.data.description}\n`;
             for(let subcommand of command.data.options.filter(o => o.toJSON().type === ApplicationCommandOptionType.Subcommand)){
                 let subcommandjson = subcommand.toJSON();
-                context += `    ${subcommandjson.name}: ${subcommandjson.description}\n`;
+                systemPromptFooter += `    ${subcommandjson.name}: ${subcommandjson.description}\n`;
             }
         }
 
@@ -184,6 +184,8 @@ module.exports = {
             context += `\n\n-----\n\nRecent polls in this channel (most recent poll is at the bottom of the list)\n`;
             for(let [_, p] of polls) context += pollString(p);
         }
+
+        contents[0].text += context;
         
         //API key selection
         const selectedKey = interaction.options.getInteger("key") ?? 1;
@@ -199,7 +201,7 @@ module.exports = {
             model: interaction.options.getString("model") ?? "gemini-2.5-flash",
             contents,
             config: {
-                systemInstruction: systemInstruction + systemPromptFooter + context,
+                systemInstruction: systemInstruction + systemPromptFooter,
                 temperature:interaction.options.getNumber("temperature") ?? 0.8,
                 tools: [
                     { googleSearch: {} },
