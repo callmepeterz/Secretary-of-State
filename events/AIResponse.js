@@ -33,6 +33,8 @@ module.exports = {
             let attachment = message.attachments.first();
             let systemPromptFooter = `\n\n-----\n\nCurrent user: ${message.author.displayName}, ID: ${message.author.id}, mentionable with <@${message.author.id}>; Current date and time: ${new Date().toString()}; ${message.context === 0 ? "Currently in a public Discord server" : "Currently in the user's direct messages"}; Current status: "${message.client.user?.presence?.activities?.[0]?.name || message.client.status.description}, set at ${message.client.status.timeStamp?.toString()}"; Current banner: ${message.client.banner.description}, set at ${message.client.banner.timeStamp?.toString()}`;
             let context = "";
+
+            //prevent internal command injections
             let prompt = message.content
             ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
             ?.replaceAll(new RegExp(setBannerRegex, "g"), "")
@@ -49,6 +51,7 @@ module.exports = {
 
             if(!prompt) return deferred?.edit("Invalid prompt!");
 
+            //download attachment, if any
             if(attachment){
                 if(supportedFileFormats.includes(mimeType)){
                     let rawattachmentData = await get(attachment.url);
@@ -71,15 +74,19 @@ module.exports = {
                 contents[0].text = `[Replying to ${repliedMsg?.author?.displayName} (ID: ${repliedMsg?.author?.id}): ${repliedMsg?.content}]\n` + prompt;
             }
 
+            //add context
             let userData = message.client.userData;
 
+            //custom instruction
             systemPromptFooter += "\n\n-----\n\nThis user's custom instruction for you\n" + (userData[message.author.id]?.customInstruction ?? "None");
 
+            //pronouns
             context += "\n\n-----\n\nKnown preferred pronouns of users (default to they/them for unknown users)\n";
             for(let u in userData){
                 context += `${u}: ${userData[u]?.pronouns}\n`;
             }
 
+            //bot's discord slash commands
             context += "\n\n-----\n\nSlash commands of the Discord user client you are operating through which users may use (/ indicates commands, indent indicates subcommands of the preceding command)\n";
             for(let [_, command] of message.client.commands){
                 context += `/${command.data.name}: ${command.data.description}\n`;
@@ -89,12 +96,14 @@ module.exports = {
                 }
             }
 
+            //request history
             let summaries = message.client.aiContext.summaries.get(message.guild ? message.guild.id : message.author.id) ?? [];
             if(summaries.length){
                 context += "\n\n-----\n\nRecent requests and responses (most recent request is at the bottom of the list)\n";
                 for(let s of summaries) context += s + "\n";
             }
 
+            //fetch messages and polls if channel hasn't been fetched
             const channID = message.guild ? message.channel.id : message.author.id;
             let messages = message.client.aiContext.messages.get(channID) ?? [];
             let polls = message.client.aiContext.polls.get(channID) ?? new Collection();
@@ -133,16 +142,19 @@ module.exports = {
                 message.client.aiContext.hasAttemptedChannelFetch.set(channID, true);
             }
             
+            //message history
             if(messages.length){
                 context += `\n\n-----\n\nRecent messages in this channel (${message.guild ? `#${message.channel.name}` : `direct messages of ${message.author.displayName}, ID: ${message.author.id}`}) (most recent message is at the bottom of the list)\n`;
                 for(let m of messages) context += m + "\n";
             }
 
+            //poll history
             if(polls.size){
                 context += `\n\n-----\n\nRecent polls in this channel (most recent poll is at the bottom of the list)\n`;
                 for(let [_, p] of polls) context += pollString(p);
             }
             
+            //API key selection
             const selectedKey = 1;
             const aiInstance = message.client.ai[selectedKey];
             
@@ -151,6 +163,7 @@ module.exports = {
                 return;
             }
 
+            //send request to AI API
             const response = await aiInstance.models.generateContent({
                 model: "gemini-2.5-flash",
                 contents,
@@ -164,15 +177,18 @@ module.exports = {
                 }
             });
 
+            //add citations
             let responseText = addCitations(response);
 
             //math formatting
             responseText = formatMath(responseText);
 
+            //extract internal commands
             let status = responseText.match(setStatusRegex)?.[1]?.slice(0, 128);
             let bannerDesc = responseText.match(setBannerRegex)?.[1]?.slice(0, 128);
             let summary = responseText.match(summarizeRegex)?.[1]?.slice(0, 512);
 
+            //execute status command
             if(status && message.guild){
                 message?.client?.user?.setPresence({activities: [{name: status, type: 4}], status: getUpdateStatus()});
                 console.log("Setting status to:", status);
@@ -185,6 +201,7 @@ module.exports = {
                 fs.writeFileSync(path.join(process.cwd(), "data/bot/status.txt"), status);
             }
 
+            //execute banner command
             if (bannerDesc && attachment && mimeType?.startsWith("image/") && message.guild) {
                 // handle time duraction for rate limiting
                 let currentTime = Date.now();
@@ -207,6 +224,7 @@ module.exports = {
                 }
             }
 
+            //add summary of request to request history
             if(summary){
                 let currentSummaries = message.client.aiContext.summaries.get(message.guild ? message.guild.id : message.author.id) ?? [];
                 currentSummaries.push(`[User: ${message.author.displayName}, ID: ${message.author.id}]: ` + summary);
@@ -214,6 +232,7 @@ module.exports = {
                 message.client.aiContext.summaries.set(message.guild ? message.guild.id : message.author.id, currentSummaries);
             }
 
+            //remove internal commands from response
             responseText = responseText
             ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
             ?.replaceAll(new RegExp(setBannerRegex, "g"), "")
@@ -223,11 +242,13 @@ module.exports = {
 
             if(!responseText) responseText = "No text was returned.";
 
+            //add response text to message history
             messages = message.client.aiContext.messages.get(channID) ?? [];
             messages.push(`[Request from ${message.author.displayName} (ID: ${message.author.id}); prompt: "${prompt.slice(0, 300)}"; your response: ${responseText.slice(0, 300)}]`);
             while(messages.join("\n").length > parseInt(process.env.CONTEXT_LIMIT)) messages.shift();
             message.client.aiContext.messages.set(channID, messages);
 
+            //split response into multiple messages and send
             const chunks = splitMarkdownMessage(responseText)?.filter(Boolean);
             let msg;
 
@@ -256,7 +277,7 @@ function pollString(p){
 }
 
 function addCitations(response) {
-    let text = response?.text;
+    let text = response?.text?.trim();
     const supports = response.candidates[0]?.groundingMetadata?.groundingSupports;
     const chunks = response.candidates[0]?.groundingMetadata?.groundingChunks;
 

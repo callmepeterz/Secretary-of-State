@@ -70,6 +70,8 @@ module.exports = {
         let attachment = interaction.options.getAttachment("file");
         let systemPromptFooter = `\n\n-----\n\nCurrent user: ${interaction.user.displayName}, ID: ${interaction.user.id}, mentionable with <@${interaction.user.id}>; Current date and time: ${new Date().toString()}; ${interaction.context === 0 ? "Currently in a public Discord server" : "Currently in the user's direct messages"}; Current status: "${interaction.client.user?.presence?.activities?.[0]?.name || interaction.client.status.description}, set at ${interaction.client.status.timeStamp?.toString()}"; Current banner: ${interaction.client.banner.description}, set at ${interaction.client.banner.timeStamp?.toString()}`;
         let context = "";
+
+        //prevent internal command injections
         let prompt = interaction.options.getString("question")
         ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
         ?.replaceAll(new RegExp(setBannerRegex, "g"), "")
@@ -86,6 +88,7 @@ module.exports = {
 
         if(!prompt) return deferred?.edit("Invalid prompt!");
 
+        //download attachment, if any
         if(attachment){
             if(supportedFileFormats.includes(mimeType)){
                 let rawattachmentData = await get(attachment.url);
@@ -102,15 +105,19 @@ module.exports = {
             else attachment = null;
         }
 
+        //add context
         let userData = interaction.client.userData;
 
+        //custom instruction
         systemPromptFooter += "\n\n-----\n\nThis user's custom instruction for you\n" + (userData[interaction.user.id]?.customInstruction ?? "None");
 
+        //pronouns
         context += "\n\n-----\n\nKnown preferred pronouns of users (default to they/them for unknown users)\n";
         for(let u in userData){
             context += `${u}: ${userData[u]?.pronouns}\n`;
         }
 
+        //bot's discord slash commands
         context += "\n\n-----\n\nSlash commands of the Discord user client you are operating through which users may use (/ indicates commands, indent indicates subcommands of the preceding command)\n";
         for(let [_, command] of interaction.client.commands){
             context += `/${command.data.name}: ${command.data.description}\n`;
@@ -120,12 +127,14 @@ module.exports = {
             }
         }
 
+        //request history
         let summaries = interaction.client.aiContext.summaries.get(interaction.context === 0 ? interaction.guild.id : interaction.user.id) ?? [];
         if(summaries.length){
             context += "\n\n-----\n\nRecent requests and responses (most recent request is at the bottom of the list)\n";
             for(let s of summaries) context += s + "\n";
         }
 
+        //fetch messages and polls if channel hasn't been fetched
         const channID = interaction.context === 0 ? interaction.channel.id : interaction.user.id;
         let messages = interaction.client.aiContext.messages.get(channID) ?? [];
         let polls = interaction.client.aiContext.polls.get(channID) ?? new Collection();
@@ -164,16 +173,19 @@ module.exports = {
             interaction.client.aiContext.hasAttemptedChannelFetch.set(channID, true);
         }
         
+        //message history
         if(messages.length){
             context += `\n\n-----\n\nRecent messages in this channel (${interaction.context === 0 ? `#${interaction.channel.name}` : `direct messages of ${interaction.user.displayName}, ID: ${interaction.user.id}`}) (most recent message is at the bottom of the list)\n`;
             for(let m of messages) context += m + "\n";
         }
 
+        //poll history
         if(polls.size){
             context += `\n\n-----\n\nRecent polls in this channel (most recent poll is at the bottom of the list)\n`;
             for(let [_, p] of polls) context += pollString(p);
         }
         
+        //API key selection
         const selectedKey = interaction.options.getInteger("key") ?? 1;
         const aiInstance = interaction.client.ai[selectedKey];
         
@@ -182,6 +194,7 @@ module.exports = {
             return;
         }
 
+        //send request to AI API
         const response = await aiInstance.models.generateContent({
             model: interaction.options.getString("model") ?? "gemini-2.5-flash",
             contents,
@@ -195,15 +208,18 @@ module.exports = {
             }
         });
 
+        //add citations
         let responseText = addCitations(response);
 
         //math formatting
         responseText = formatMath(responseText);
 
+        //extract internal commands
         let status = responseText.match(setStatusRegex)?.[1]?.slice(0, 128);
         let bannerDesc = responseText.match(setBannerRegex)?.[1]?.slice(0, 128);
         let summary = responseText.match(summarizeRegex)?.[1]?.slice(0, 512);
 
+        //execute status command
         if(status && interaction.context === 0){
             interaction?.client?.user?.setPresence({activities: [{name: status, type: 4}], status: getUpdateStatus()});
             console.log("Setting status to:", status);
@@ -216,6 +232,7 @@ module.exports = {
             fs.writeFileSync(path.join(process.cwd(), "data/bot/status.txt"), status);
         }
 
+        //execute banner command
         if (bannerDesc && attachment && mimeType?.startsWith("image/") && interaction.context === 0) {
             // handle time duraction for rate limiting
             let currentTime = Date.now();
@@ -238,6 +255,7 @@ module.exports = {
             }
         }
 
+        //add summary of request to request history
         if(summary){
             let currentSummaries = interaction.client.aiContext.summaries.get(interaction.context === 0 ? interaction.guild.id : interaction.user.id) ?? [];
             currentSummaries.push(`[User: ${interaction.user.displayName}, ID: ${interaction.user.id}]: ` + summary);
@@ -245,6 +263,7 @@ module.exports = {
             interaction.client.aiContext.summaries.set(interaction.context === 0 ? interaction.guild.id : interaction.user.id, currentSummaries);
         }
 
+        //remove internal commands from response
         responseText = responseText
         ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
         ?.replaceAll(new RegExp(setBannerRegex, "g"), "")
@@ -254,11 +273,13 @@ module.exports = {
 
         if(!responseText) responseText = "No text was returned.";
 
+        //add response text to message history
         messages = interaction.client.aiContext.messages.get(channID) ?? [];
         messages.push(`[Request from ${interaction.user.displayName} (ID: ${interaction.user.id}); prompt: "${prompt.slice(0, 300)}"; your response: ${responseText.slice(0, 300)}]`);
         while(messages.join("\n").length > parseInt(process.env.CONTEXT_LIMIT)) messages.shift();
         interaction.client.aiContext.messages.set(channID, messages);
 
+        //split response into multiple messages and send
         const chunks = splitMarkdownMessage(responseText)?.filter(Boolean);
         let msg;
 
@@ -285,7 +306,7 @@ function pollString(p){
 }
 
 function addCitations(response) {
-    let text = response?.text;
+    let text = response?.text?.trim();
     const supports = response.candidates[0]?.groundingMetadata?.groundingSupports;
     const chunks = response.candidates[0]?.groundingMetadata?.groundingChunks;
 
