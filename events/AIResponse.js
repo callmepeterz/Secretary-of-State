@@ -31,7 +31,7 @@ module.exports = {
 
             const systemInstruction = message.client.aiContext.systemInstruction;
             let attachment = message.attachments.first();
-            let systemPromptFooter = `\n\n-----\n\nCurrent user: ${message.author.displayName}, ID: ${message.author.id}, mentionable with <@${message.author.id}>; Current date and time: ${new Date().toString()}; ${message.context === 0 ? "Currently in a public Discord server" : "Currently in the user's direct messages"}; Current status: "${message.client.user?.presence?.activities?.[0]?.name || message.client.status.description}, set at ${message.client.status.timeStamp?.toString()}"; Current banner: ${message.client.banner.description}, set at ${message.client.banner.timeStamp?.toString()}`;
+            let systemPromptFooter = `\n\n-----\n\nCurrent user: ${message.author.displayName}, ID: ${message.author.id}, mentionable with <@${message.author.id}>; Current date and time: ${new Date().toString()}; ${message.context === 0 ? "Currently in a public Discord server" : "Currently in the user's direct messages"}; Current status: "${message.client.status.description}, set at ${(new Date(message.client.status.timeStamp)).toString()}"; Current banner: ${message.client.banner.description}, set at ${message.client.banner.timeStamp?.toString()}`;
             let context = "";
 
             //prevent internal command injections
