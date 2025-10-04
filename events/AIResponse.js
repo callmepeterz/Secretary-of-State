@@ -59,6 +59,7 @@ module.exports = {
             //download attachment, if any
             let attachment = repliedMsg?.attachments?.first() ?? message.attachments.first();
             let mimeType = attachment?.contentType?.split(";")?.[0];
+            if(mimeType === "application/javascript") mimeType = "text/javascript";
             let attachmentData = null;
 
             if(attachment){
