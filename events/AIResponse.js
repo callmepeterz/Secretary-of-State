@@ -30,7 +30,6 @@ module.exports = {
             message.channel.sendTyping().catch(()=>{});
 
             const systemInstruction = message.client.aiContext.systemInstruction;
-            let attachment = message.attachments.first();
             let systemPromptFooter = `\n\n-----\n\nCurrent user: ${message.author.displayName}, ID: ${message.author.id}, mentionable with <@${message.author.id}>; Current date and time: ${new Date().toString()}; ${message.context === 0 ? "Currently in a public Discord server" : "Currently in the user's direct messages"}; Current status: "${message.client.status.description}, set at ${(new Date(message.client.status.timeStamp)).toString()}"; Current banner: ${message.client.banner.description}, set at ${message.client.banner.timeStamp?.toString()}`;
             let context = "";
 
@@ -46,12 +45,22 @@ module.exports = {
                     role: "user"
                 }
             ];
-            let mimeType = attachment?.contentType?.split(";")?.[0];
-            let attachmentData = null;
 
             if(!prompt) return deferred?.edit("Invalid prompt!");
 
+            //fetch message replied to, if any
+            let repliedID = message.reference?.messageId;
+            let repliedMsg;
+            if(repliedID){
+                repliedMsg = await message.channel.messages.fetch(repliedID);
+                contents[0].text = `[Replying to ${repliedMsg?.author?.displayName} (ID: ${repliedMsg?.author?.id}): ${repliedMsg?.content}]\n` + prompt;
+            }
+
             //download attachment, if any
+            let attachment = repliedMsg?.attachments?.first() ?? message.attachments.first();
+            let mimeType = attachment?.contentType?.split(";")?.[0];
+            let attachmentData = null;
+
             if(attachment){
                 if(supportedFileFormats.includes(mimeType)){
                     let rawattachmentData = await get(attachment.url);
@@ -66,12 +75,6 @@ module.exports = {
                     );
                 }
                 else attachment = null;
-            }
-
-            let repliedID = message.reference?.messageId;
-            if(repliedID){
-                let repliedMsg = await message.channel.messages.fetch(repliedID);
-                contents[0].text = `[Replying to ${repliedMsg?.author?.displayName} (ID: ${repliedMsg?.author?.id}): ${repliedMsg?.content}]\n` + prompt;
             }
 
             //add context
