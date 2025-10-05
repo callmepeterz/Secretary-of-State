@@ -174,7 +174,7 @@ module.exports = {
 
         interaction.client.userData[interaction.user.id] = userData;
         let userDataPath = path.join(process.cwd(), `data/users/${userData.id}.json`);
-        fs.writeFileSync(userDataPath, JSON.stringify(userData));
+        fs.writeFileSync(userDataPath, JSON.stringify(userData, null, "\t"));
     },
 
     /**
