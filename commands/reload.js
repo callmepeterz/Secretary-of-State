@@ -8,20 +8,17 @@ module.exports = {
     .setDescription("Reloads cache")
     .setNSFW(false)
     .setContexts(InteractionContextType.BotDM)
-    .addSubcommand(
-        new SlashCommandSubcommandBuilder()
-        .setName("commands")
-        .setDescription("Reloads command cache")
-    )
-    .addSubcommand(
-        new SlashCommandSubcommandBuilder()
-        .setName("userdata")
-        .setDescription("Reloads user data cache")
-    )
-    .addSubcommand(
-        new SlashCommandSubcommandBuilder()
-        .setName("systeminstruction")
-        .setDescription("Reloads system instruction")
+    .addStringOption(
+        new SlashCommandStringOption()
+        .setName("component")
+        .setDescription("The component to reload")
+        .setRequired(true)
+        .setChoices(
+            {name: "Commands", value: "commands"},
+            {name: "Event listener callbacks", value: "events"},
+            {name: "User data", value: "userdata"},
+            {name: "AI system instruction", value:"systeminstruction"},
+        )
     ),
     index: "",
     isDeferred: false,
@@ -36,7 +33,7 @@ module.exports = {
         let embed = new EmbedBuilder().setColor(color);
         if(interaction.user.id !== process.env.OWNER_ID) return interaction.reply({embeds: [embed.setDescription("Unauthorized!")], flags: MessageFlags.Ephemeral});
 
-        switch(interaction.options.getSubcommand()){
+        switch(interaction.options.getString("component")){
             case "commands":
                 const commandsPath = path.join(process.cwd(), 'commands');
                 const commandFiles = fs.readdirSync(commandsPath).filter(file=>file.endsWith(".js"));
@@ -53,6 +50,24 @@ module.exports = {
                 }
                 console.log(`Reloaded ${commandFiles.length} command(s).`);
                 interaction.reply({embeds: [embed.setDescription(`Reloaded ${commandFiles.length} command(s).`)]});
+                break;
+
+            case "events":
+                const eventsPath = path.join(process.cwd(), 'events');
+                const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+
+                for (const file of eventFiles) {
+                    const filePath = path.join(eventsPath, file);
+                    delete require.cache[require.resolve(filePath)];
+                    const event = require(filePath);
+                    if (event.once) {
+                        interaction.client.once(event.name, (...args) => event.execute(...args));
+                    } else {
+                        interaction.client.on(event.name, (...args) => event.execute(...args));
+                    }
+                }
+                console.log(`Reloaded ${eventFiles.length} event(s).`);
+                interaction.reply({embeds: [embed.setDescription(`Reloaded ${eventFiles.length} event(s).`)]});
                 break;
 
             case "userdata":
