@@ -246,12 +246,14 @@ module.exports = {
 
             responseText = responseText.trim();
 
-            let responseFile = null;
+            let responseFile = [];
             if(!responseText){
                 responseText = "No text was returned.";
-                responseFile = new AttachmentBuilder()
-                .setName("response_raw.json")
-                .setFile(Buffer.from(JSON.stringify(response, null, "\t")));
+                responseFile.push(
+                    new AttachmentBuilder()
+                    .setName("response_raw.json")
+                    .setFile(Buffer.from(JSON.stringify(response, null, "\t")))
+                ) 
             }
 
             //add response text to message history
@@ -266,13 +268,13 @@ module.exports = {
 
             if(message.guild){
                 for(let x = 0; x < chunks.length; x++){
-                    if(x === 0) msg = await message.channel.send({content: chunks[0]?.slice(0, 2000), files: [responseFile], allowedMentions: {users: [message.author.id], roles: []}});
+                    if(x === 0) msg = await message.channel.send({content: chunks[0]?.slice(0, 2000), files: responseFile, allowedMentions: {users: [message.author.id], roles: []}});
                     else msg = await msg?.reply({content: chunks[x]?.slice(0, 2000), allowedMentions: {users: [message.author.id], roles: []}});
                 }
             }
             else {
                 for(let x = 0; x < chunks.length; x++){
-                    await message.author.send({content: chunks[x]?.slice(0, 2000), files: [responseFile], allowedMentions: {users: [message.author.id], roles: []}});
+                    await message.author.send({content: chunks[x]?.slice(0, 2000), files: responseFile, allowedMentions: {users: [message.author.id], roles: []}});
                 }
             }
         } catch (err) {
