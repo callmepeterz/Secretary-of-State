@@ -1,4 +1,4 @@
-const { Collection,  Events, Message, ApplicationCommandOptionType, PresenceUpdateStatus } = require('discord.js');
+const { Collection, Events, Message, ApplicationCommandOptionType, PresenceUpdateStatus, AttachmentBuilder } = require('discord.js');
 const get = require("../util/httpsGet.js");
 const { formatMath, formatSuperscript } = require("../util/formatMath.js");
 const fs = require("node:fs");
@@ -246,7 +246,13 @@ module.exports = {
 
             responseText = responseText.trim();
 
-            if(!responseText) responseText = "No text was returned.";
+            let responseFile = null;
+            if(!responseText){
+                responseText = "No text was returned.";
+                responseFile = new AttachmentBuilder()
+                .setName("response_raw.json")
+                .setFile(Buffer.from(JSON.stringify(response, null, "\t")));
+            }
 
             //add response text to message history
             messages = message.client.aiContext.messages.get(channID) ?? [];
@@ -260,13 +266,13 @@ module.exports = {
 
             if(message.guild){
                 for(let x = 0; x < chunks.length; x++){
-                    if(x === 0) msg = await message.channel.send({content: chunks[0]?.slice(0, 2000), allowedMentions: {users: [message.author.id], roles: []}});
+                    if(x === 0) msg = await message.channel.send({content: chunks[0]?.slice(0, 2000), files: [responseFile], allowedMentions: {users: [message.author.id], roles: []}});
                     else msg = await msg?.reply({content: chunks[x]?.slice(0, 2000), allowedMentions: {users: [message.author.id], roles: []}});
                 }
             }
             else {
                 for(let x = 0; x < chunks.length; x++){
-                    await message.author.send({content: chunks[x]?.slice(0, 2000), allowedMentions: {users: [message.author.id], roles: []}});
+                    await message.author.send({content: chunks[x]?.slice(0, 2000), files: [responseFile], allowedMentions: {users: [message.author.id], roles: []}});
                 }
             }
         } catch (err) {
