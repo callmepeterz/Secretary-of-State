@@ -17,7 +17,8 @@ module.exports = {
         let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let embed = new EmbedBuilder()
         .setDescription(`This bot has been up since <t:${Math.round((Date.now() - interaction.client.uptime)/1000)}:F>, <t:${Math.round((Date.now() - interaction.client.uptime)/1000)}:R>`)
-        .setColor(color);
+        .setColor(color)
+        .setTimestamp();
 
         interaction?.reply({embeds: [embed]});
     },
