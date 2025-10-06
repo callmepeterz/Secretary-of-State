@@ -17,7 +17,8 @@ module.exports = {
     /**
      * @param {Message} message 
      */
-    async execute(message){
+    async execute(message, attempt = 0){
+        attempt ++;
         try {
             if(!message.mentions.has(message.client.user.id) || !message.content || message.author.bot) return;
             if(Date.now() - message.client.aiContext.lastCalled[message.author.id] < 10000){
@@ -248,13 +249,16 @@ module.exports = {
 
             let responseFile = [];
             if(!responseText){
+                if(attempt < parseInt(process.env.AI_MAX_ATTEMPT)) return setTimeout(() => this.execute(message, attempt), 1000);
                 responseText = "No text was returned.";
                 responseFile.push(
                     new AttachmentBuilder()
                     .setName("response_raw.json")
                     .setFile(Buffer.from(JSON.stringify(response, null, "\t")))
-                ) 
+                );
             }
+
+            if(attempt > 1) responseText +=`\n-#Attempt ${attempt}`;
 
             //add response text to message history
             messages = message.client.aiContext.messages.get(channID) ?? [];
