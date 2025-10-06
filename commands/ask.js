@@ -1,4 +1,4 @@
-const { Collection, SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ApplicationCommandOptionType, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption, PresenceUpdateStatus, AttachmentBuilder } = require('discord.js');
+const { Collection, SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ApplicationCommandOptionType, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption, PresenceUpdateStatus, AttachmentBuilder, InteractionContextType } = require('discord.js');
 const get = require("../util/httpsGet.js");
 const { formatMath, formatSuperscript } = require("../util/formatMath.js");
 const fs = require("node:fs");
@@ -69,7 +69,7 @@ module.exports = {
         attempt++;
         const systemInstruction = interaction.client.aiContext.systemInstruction;
         let attachment = interaction.options.getAttachment("file");
-        let systemPromptFooter = `\n\n-----\n\nCurrent user: ${interaction.user.displayName}, ID: ${interaction.user.id}, mentionable with <@${interaction.user.id}>; Current date and time: ${new Date().toString()}; ${interaction.context === 0 ? "Currently in a public Discord server" : "Currently in the user's direct messages"}; Current status: "${interaction.client.status.description}, set at ${(new Date(interaction.client.status.timeStamp)).toString()}"; Current banner: ${interaction.client.banner.description}, set at ${interaction.client.banner.timeStamp?.toString()}`;
+        let systemPromptFooter = `\n\n-----\n\nCurrent user: ${interaction.user.displayName}, ID: ${interaction.user.id}, ${interaction.context === InteractionContextType.Guild ? `server nickname: ${interaction?.member?.nickname}, ` : ""}mentionable with <@${interaction.user.id}>; Current date and time: ${new Date().toString()}; ${interaction.context === 0 ? "Currently in a public Discord server" : "Currently in the user's direct messages"}; Current status: "${interaction.client.status.description}, set at ${(new Date(interaction.client.status.timeStamp)).toString()}"; Current banner: ${interaction.client.banner.description}, set at ${interaction.client.banner.timeStamp?.toString()}`;
         let context = "";
 
         //prevent internal command injections
