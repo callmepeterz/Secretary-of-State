@@ -54,7 +54,7 @@ module.exports = {
             let repliedMsg;
             if(repliedID){
                 repliedMsg = await message.channel.messages.fetch(repliedID);
-                contents[0].text = `[Replying to ${repliedMsg?.author?.displayName} (ID: ${repliedMsg?.author?.id}): ${repliedMsg?.content}]\n` + prompt;
+                contents[0].text = `[Replying to ${repliedMsg?.author?.displayName} (ID: ${repliedMsg?.author?.id}${repliedMsg?.guild ? `, server nickname: ${repliedMsg.member.nickname}` : ""}): ${repliedMsg?.content}]\n` + prompt;
             }
 
             //download attachment, if any
