@@ -1,4 +1,4 @@
-const { Events, BaseInteraction, MessageFlags, Collection } = require('discord.js');
+const { Events, BaseInteraction, MessageFlags, Collection, EmbedBuilder } = require('discord.js');
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -49,9 +49,12 @@ module.exports = {
             await command.execute(interaction, deferred);
         } catch (error) {
             console.error(error);
-            try {            
-                if(command.isDeferred) deferred?.edit({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral }).catch(()=>{});     
-                else interaction?.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral }).catch(()=>{});
+            try {
+                let embed = new EmbedBuilder()
+                .setColor(process.env.DEFAULT_COLOR)
+                .setDescription(`There was an error while executing this command!\n\`\`\`\n${String(error).slice(0, 1000)}\n\`\`\``);          
+                if(command.isDeferred) deferred?.edit({ embeds: [embed], flags: MessageFlags.Ephemeral }).catch(()=>{});     
+                else interaction?.reply({ embeds: [embed], flags: MessageFlags.Ephemeral }).catch(()=>{});
             } catch (err) {
                 console.error(error);
             }
