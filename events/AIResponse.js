@@ -258,7 +258,7 @@ module.exports = {
                 );
             }
 
-            if(attempt > 1) responseText +=`\n-#Attempt ${attempt}`;
+            if(attempt > 1) responseText +=`\n-# Attempt ${attempt}`;
 
             //add response text to message history
             messages = message.client.aiContext.messages.get(channID) ?? [];
