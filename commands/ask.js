@@ -65,7 +65,8 @@ module.exports = {
      * @param {ChatInputCommandInteraction} interaction 
      * @param {InteractionResponse} deferred
      */
-    async execute(interaction, deferred){
+    async execute(interaction, deferred, attempt = 0){
+        attempt++;
         const systemInstruction = interaction.client.aiContext.systemInstruction;
         let attachment = interaction.options.getAttachment("file");
         let systemPromptFooter = `\n\n-----\n\nCurrent user: ${interaction.user.displayName}, ID: ${interaction.user.id}, mentionable with <@${interaction.user.id}>; Current date and time: ${new Date().toString()}; ${interaction.context === 0 ? "Currently in a public Discord server" : "Currently in the user's direct messages"}; Current status: "${interaction.client.status.description}, set at ${(new Date(interaction.client.status.timeStamp)).toString()}"; Current banner: ${interaction.client.banner.description}, set at ${interaction.client.banner.timeStamp?.toString()}`;
@@ -276,6 +277,7 @@ module.exports = {
 
         let responseFile = [];
         if(!responseText){
+            if(attempt < parseInt(process.env.AI_MAX_ATTEMPT)) return setTimeout(() => this.execute(interaction, deferred, attempt), 1000);
             responseText = "No text was returned.";
             responseFile.push(
                 new AttachmentBuilder()
@@ -284,6 +286,8 @@ module.exports = {
             ) 
         }
         
+        if(attempt > 1) responseText +=`\n-# Attempt ${attempt}`;
+
         //add response text to message history
         messages = interaction.client.aiContext.messages.get(channID) ?? [];
         messages.push(`[Request from ${interaction.user.displayName} (ID: ${interaction.user.id}); prompt: "${prompt.slice(0, 300)}"; your response: ${responseText.slice(0, 300)}]`);

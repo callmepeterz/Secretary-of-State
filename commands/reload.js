@@ -56,6 +56,7 @@ module.exports = {
                 const eventsPath = path.join(process.cwd(), 'events');
                 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
+                interaction.client.removeAllListeners();
                 for (const file of eventFiles) {
                     const filePath = path.join(eventsPath, file);
                     delete require.cache[require.resolve(filePath)];
