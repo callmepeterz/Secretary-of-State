@@ -1,4 +1,4 @@
-const { Collection, Events, Message, ApplicationCommandOptionType, PresenceUpdateStatus, AttachmentBuilder } = require('discord.js');
+const { Collection, Events, Message, ApplicationCommandOptionType, PresenceUpdateStatus, AttachmentBuilder, EmbedBuilder } = require('discord.js');
 const get = require("../util/httpsGet.js");
 const { formatMath, formatSuperscript } = require("../util/formatMath.js");
 const fs = require("node:fs");
@@ -282,7 +282,11 @@ module.exports = {
                 }
             }
         } catch (err) {
-            message.channel.send("Encountered an error!").catch(()=>{});
+            let embed = new EmbedBuilder()
+            .setColor(process.env.DEFAULT_COLOR)
+            .setDescription(`Encountered an error!\n\`\`\`\n${String(err).slice(0, 1000)}\n\`\`\``);          
+                
+            message.channel.send({embeds: [embed]}).catch(()=>{});
             console.error(err);
         }
     },
