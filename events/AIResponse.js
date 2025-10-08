@@ -247,9 +247,10 @@ module.exports = {
 
             responseText = responseText.trim();
 
+            //reattempt if response is empty
             let responseFile = [];
             if(!responseText){
-                if(attempt < parseInt(process.env.AI_MAX_ATTEMPT)) return setTimeout(() => this.execute(message, attempt), 1000);
+                if(attempt < parseInt(process.env.AI_MAX_ATTEMPT)) return setTimeout(() => this.execute(message, attempt), process.env.ATTEMPT_TIMEOUT);
                 responseText = "No text was returned.";
                 responseFile.push(
                     new AttachmentBuilder()
