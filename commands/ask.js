@@ -365,7 +365,7 @@ function addCitations(response) {
         references += `[${i + 1}]: [${chunk.web.title}](<${chunk.web.uri.replaceAll(" ", "+")}>)\n`;
     }
 
-    return text + references;
+    return text?.trim() + references;
 }
 
 function insertCitation(str, chunkText, citation, startIndex) {
