@@ -57,7 +57,7 @@ Secretary of State is a Discord bot intended to serve the Bayer Free State and t
  npm run register_guild
  ```
 
- 6. ### Start bot
+ 6. ### Start the bot
  ```bash
  node index.js
  ```
