@@ -8,7 +8,7 @@ Secretary of State is a Discord bot intended to serve the Bayer Free State and t
 
  1. ### Clone the repository
  ```bash
- git clone https://github.com/Secretary-of-State.git
+ git clone https://github.com/callmepeterz/Secretary-of-State.git
  ```
 
  2. ### Install packages
