@@ -6,18 +6,19 @@ Secretary of State is a Discord bot intended to serve the Bayer Free State and t
 
 ## Installation
 
- 1. Clone the repository
+ 1. ### Clone the repository
  ```bash
  git clone https://github.com/Secretary-of-State.git
  ```
 
- 2. Install packages
+ 2. ### Install packages
  ```bash
  cd Secretary-of-State
  npm install
  ```
 
- 3. Configure environment variables
+ 3. ### Configure environment variables
+
  Create a file named `.env` in the directory with the following content:
  ```env
  TOKEN= #Discord bot token
@@ -43,9 +44,9 @@ Secretary of State is a Discord bot intended to serve the Bayer Free State and t
  GEMINI_API_KEY= #Google AI API keys
  GEMINI_API_KEY_2=
  ```
- 4. (Optional) Provide AI system instruction in `assets/systemPrompt.txt`
+ 4. ### (Optional) Provide AI system instruction in `assets/systemPrompt.txt`
 
- 5. Register slash commands
+ 5. ### Register slash commands
  
  Register commands at application level
  ```bash
@@ -56,7 +57,7 @@ Secretary of State is a Discord bot intended to serve the Bayer Free State and t
  npm run register_guild
  ```
 
- 6. Start bot
+ 6. ### Start bot
  ```bash
  node index.js
  ```
