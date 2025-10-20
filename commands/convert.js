@@ -35,7 +35,7 @@ module.exports = {
      * @param {InteractionResponse} deferred
      */
     async execute(interaction, deferred){
-        const color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
+        const color = interaction.guild?.members?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let embed = new EmbedBuilder().setColor(color);
         const attachment = interaction.options.getAttachment("file");
         const originalFormat = attachment.name.split(".")?.at(-1).toLowerCase();

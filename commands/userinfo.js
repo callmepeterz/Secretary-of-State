@@ -20,7 +20,7 @@ module.exports = {
      * @param {InteractionResponse} deferred
      */
     async execute(interaction, deferred){
-        let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
+        let color = interaction.guild?.members?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let user = interaction.options.getUser("user") ?? interaction.user;
         let member = interaction.guild?.members?.cache?.get(user.id);
         let embed = new EmbedBuilder()

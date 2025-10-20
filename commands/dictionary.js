@@ -23,7 +23,7 @@ module.exports = {
      * @param {InteractionResponse} deferred
      */
     async execute(interaction, deferred) {
-        let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
+        let color = interaction.guild?.members?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let word = interaction.options.getString("word");
         let data = await get(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURL(word)}`);
         let json;

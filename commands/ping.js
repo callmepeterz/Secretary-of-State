@@ -14,7 +14,7 @@ module.exports = {
      * @param {InteractionResponse} deferred
      */
     async execute(interaction, deferred){
-        let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
+        let color = interaction.guild?.members?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let embed = new EmbedBuilder().setColor(color);
         let msg = await interaction.channel?.send("Pinging...").catch(()=>{});
         if(!msg) return interaction?.reply({embeds: [embed.setDescription("Could not get latency!")], flags: MessageFlags.Ephemeral});

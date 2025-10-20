@@ -29,7 +29,7 @@ module.exports = {
      * @param {InteractionResponse} deferred
      */
     async execute(interaction, deferred){
-        let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
+        let color = interaction.guild?.members?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let n = interaction.options.getInteger("n");
         let verbose = interaction.options.getBoolean("verbose") ?? false;
         let palindromesOutput = getPalindromes(n);

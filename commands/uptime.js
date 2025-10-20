@@ -16,7 +16,7 @@ module.exports = {
      * @param {InteractionResponse} deferred
      */
     async execute(interaction, deferred){
-        let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
+        let color = interaction.guild?.members?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let botUptime = time.getTimeComponents(interaction.client.uptime);
         let systemUptime = time.getTimeComponents(Math.floor(os.uptime() * 1000));
         let embed = new EmbedBuilder()

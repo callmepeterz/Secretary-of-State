@@ -132,7 +132,7 @@ module.exports = {
      * @param {InteractionResponse} deferred
      */
     async execute(interaction, deferred){
-        let color = interaction.guild?.me?.displayHexColor || process.env.DEFAULT_COLOR;
+        let color = interaction.guild?.members?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let qrColor = interaction.options.getString("color")?.match(colorRegex)?.[1] ?? "000";
         let bgColor = interaction.options.getString("bgcolor")?.match(colorRegex)?.[1] ?? "fff";
         let userData = interaction.client.userData[interaction.user.id];
