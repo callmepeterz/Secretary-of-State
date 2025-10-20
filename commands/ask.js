@@ -34,7 +34,8 @@ module.exports = {
         .setRequired(false)
         .addChoices(
             {name: "Gemini 2.5 Flash", value: "gemini-2.5-flash"},
-            {name: "Gemini 2.5 Pro", value: "gemini-2.5-pro"}
+            {name: "Gemini 2.5 Pro", value: "gemini-2.5-pro"},
+            {name: "Gemini Flash Latest", value: "gemini-flash-latest"},
         )
     )
     .addNumberOption(
