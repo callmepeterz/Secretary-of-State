@@ -301,8 +301,8 @@ function pollString(p){
 
 function addCitations(response) {
     let text = response?.text?.trim();
-    const supports = response.candidates[0]?.groundingMetadata?.groundingSupports;
-    const chunks = response.candidates[0]?.groundingMetadata?.groundingChunks;
+    const supports = response?.candidates?.[0]?.groundingMetadata?.groundingSupports;
+    const chunks = response?.candidates?.[0]?.groundingMetadata?.groundingChunks;
 
     if (!supports?.length || !chunks?.length || !text) return text;
 
