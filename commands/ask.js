@@ -30,21 +30,32 @@ module.exports = {
     .addStringOption(
         new SlashCommandStringOption()
         .setName("model")
-        .setDescription("Specify which model to use, default is Gemini 2.5 Flash")
+        .setDescription("Specify which model to use, default is Gemini 3 Flash")
         .setRequired(false)
         .addChoices(
+            {name: "Gemini 3 Flash", value: "gemini-3-flash-preview"},
+            {name: "Gemini 3 Pro", value: "gemini-3-pro-preview"},
             {name: "Gemini 2.5 Flash", value: "gemini-2.5-flash"},
             {name: "Gemini 2.5 Pro", value: "gemini-2.5-pro"},
-            {name: "Gemini Flash Latest", value: "gemini-flash-latest"},
         )
     )
     .addNumberOption(
         new SlashCommandNumberOption()
         .setName("temperature")
-        .setDescription("Specify temperature for the AI, default is 0.8")
+        .setDescription("Specify temperature for the AI, default is 1 (recommended)")
         .setRequired(false)
         .setMinValue(0)
         .setMaxValue(2)
+    )
+    .addStringOption(
+        new SlashCommand()
+        .setName("thinking_level")
+        .setDescription("Pick the thinking level for the AI, default is 'High'")
+        .setRequired(false)
+        .addChoices(
+            {name: "High", value: "high"},
+            {name: "Low", value: "low"},
+        )
     )
     .addIntegerOption(
         new SlashCommandIntegerOption()
@@ -201,11 +212,14 @@ module.exports = {
 
         //send request to AI API
         const response = await aiInstance.models.generateContent({
-            model: interaction.options.getString("model") ?? "gemini-2.5-flash",
+            model: interaction.options.getString("model") ?? "gemini-3-flash-preview",
             contents,
             config: {
                 systemInstruction: systemInstruction + systemPromptFooter,
-                temperature:interaction.options.getNumber("temperature") ?? 0.8,
+                temperature:interaction.options.getNumber("temperature") ?? 1,
+                thinkingConfig: {
+                    thinkingLevel: interaction.options.getString("thinking_level") ?? "high",
+                },
                 tools: [
                     { googleSearch: {} },
                     { urlContext: {} }
