@@ -1,0 +1,1 @@
+A weighted graph with nodes u, v, w, x, y. Edges are u-v (9), v-w (3), v-x (6), w-x (4), x-y (6). All enclosed in a light blue shape.

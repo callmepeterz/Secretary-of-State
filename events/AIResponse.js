@@ -172,11 +172,14 @@ module.exports = {
 
             //send request to AI API
             const response = await aiInstance.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-3-flash-preview",
                 contents,
                 config: {
                     systemInstruction: systemInstruction + systemPromptFooter,
-                    temperature: 0.8,
+                    temperature: 1,
+                    thinkingConfig: {
+                    thinkingLevel: "high",
+                },
                     tools: [
                         { googleSearch: {} },
                         { urlContext: {} }
@@ -300,7 +303,11 @@ function pollString(p){
 }
 
 function addCitations(response) {
-    let text = response?.text?.trim();
+    let text = "";
+    if(response?.candidates?.[0]?.content?.parts){
+        text = response.candidates[0].content.parts.filter(p => p.text).map(p => p.text).join("");
+    }
+    text = text.trim();
     const supports = response?.candidates?.[0]?.groundingMetadata?.groundingSupports;
     const chunks = response?.candidates?.[0]?.groundingMetadata?.groundingChunks;
 
