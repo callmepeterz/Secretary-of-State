@@ -48,7 +48,7 @@ module.exports = {
         .setMaxValue(2)
     )
     .addStringOption(
-        new SlashCommand()
+        new SlashCommandStringOption()
         .setName("thinking_level")
         .setDescription("Pick the thinking level for the AI, default is 'High'")
         .setRequired(false)
