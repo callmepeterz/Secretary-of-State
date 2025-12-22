@@ -445,8 +445,8 @@ function splitMarkdownMessage(content, maxLength = 2000) {
 }
 
 function getUpdateStatus() {
-	let date = new Date(Date.now() + (parseFloat(process.env.UTC_OFFSET) * 3600000));
-	if(date.getUTCDay() === 0 || date.getUTCDay() === 6) return PresenceUpdateStatus.Idle;
-	if(date.getUTCDay() === 1) return PresenceUpdateStatus.DoNotDisturb;
-	return PresenceUpdateStatus.Online;
+    let date = new Date(Date.now() + (parseFloat(process.env.UTC_OFFSET) * 3600000));
+    if(date.getUTCDay() === 0 || date.getUTCDay() === 6) return PresenceUpdateStatus.Idle;
+    if(date.getUTCDay() === 1) return PresenceUpdateStatus.DoNotDisturb;
+    return PresenceUpdateStatus.Online;
 }
