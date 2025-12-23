@@ -92,6 +92,9 @@ dist
 # vscode settings.json
 .vscode/settings.json
 
+# zed settings
+.zed/settings.json
+
 # vuepress build output
 .vuepress/dist
 
