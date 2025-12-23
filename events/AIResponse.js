@@ -200,8 +200,9 @@ module.exports = {
                     temperature: 1,
                     safetySettings,
                     thinkingConfig: {
-                    thinkingLevel: "high",
-                },
+                        thinkingLevel: "high",
+                        includeThoughts: false,
+                    },
                     tools: [
                         { googleSearch: {} },
                         { urlContext: {} }

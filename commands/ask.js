@@ -241,6 +241,7 @@ module.exports = {
                 safetySettings,
                 thinkingConfig: {
                     thinkingLevel: interaction.options.getString("thinking_level") ?? "high",
+                    includeThoughts: false,
                 },
                 tools: [
                     { googleSearch: {} },
