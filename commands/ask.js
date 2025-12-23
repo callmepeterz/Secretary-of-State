@@ -1,5 +1,6 @@
 const { Collection, SlashCommandBuilder, SlashCommandStringOption, SlashCommandNumberOption, SlashCommandAttachmentOption, ApplicationCommandOptionType, ChatInputCommandInteraction, InteractionResponse, SlashCommandIntegerOption, PresenceUpdateStatus, AttachmentBuilder, InteractionContextType } = require('discord.js');
 const get = require("../util/httpsGet.js");
+const { HarmCategory, HarmBlockThreshold } = require("@google/genai");
 const { formatMath, formatSuperscript } = require("../util/formatMath.js");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -211,12 +212,33 @@ module.exports = {
         }
 
         //send request to AI API
+
+        const safetySettings = [
+            {
+                category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+                threshold: HarmBlockThreshold.BLOCK_NONE,
+            },
+            {
+                category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                threshold: HarmBlockThreshold.BLOCK_NONE,
+            },
+            {
+                category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                threshold: HarmBlockThreshold.BLOCK_NONE,
+            },
+            {
+                category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                threshold: HarmBlockThreshold.BLOCK_NONE,
+            },
+        ];
+
         const response = await aiInstance.models.generateContent({
             model: interaction.options.getString("model") ?? "gemini-3-flash-preview",
             contents,
             config: {
                 systemInstruction: systemInstruction + systemPromptFooter,
                 temperature:interaction.options.getNumber("temperature") ?? 1,
+                safetySettings,
                 thinkingConfig: {
                     thinkingLevel: interaction.options.getString("thinking_level") ?? "high",
                 },

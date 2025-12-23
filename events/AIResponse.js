@@ -1,4 +1,5 @@
 const { Collection, Events, Message, ApplicationCommandOptionType, PresenceUpdateStatus, AttachmentBuilder, EmbedBuilder } = require('discord.js');
+const { HarmCategory, HarmBlockThreshold } = require("@google/genai");
 const get = require("../util/httpsGet.js");
 const { formatMath, formatSuperscript } = require("../util/formatMath.js");
 const fs = require("node:fs");
@@ -171,12 +172,33 @@ module.exports = {
             contents[0].text += context;
 
             //send request to AI API
+
+            const safetySettings = [
+                {
+                    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+                {
+                    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+                {
+                    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+                {
+                    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+            ];
+
             const response = await aiInstance.models.generateContent({
                 model: "gemini-3-flash-preview",
                 contents,
                 config: {
                     systemInstruction: systemInstruction + systemPromptFooter,
                     temperature: 1,
+                    safetySettings,
                     thinkingConfig: {
                     thinkingLevel: "high",
                 },
