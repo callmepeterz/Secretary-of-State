@@ -7,6 +7,9 @@ const path = require("node:path");
 const setStatusRegex = /\{\{SetStatus::(.+?)\}\}/;
 const setBannerRegex = /\{\{SetBanner::(.+?)\}\}/;
 const summarizeRegex = /\{\{Summarize::(.+?)\}\}/;
+const gifRegex = /\{\{GIF::(.+?)\}\}/;
+
+const gifs = require("../assets/gifs.json");
 
 const supportedFileFormats = require("../assets/geminiSupportedFileFormats.json");
 
@@ -39,7 +42,8 @@ module.exports = {
             let prompt = message.content
             ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
             ?.replaceAll(new RegExp(setBannerRegex, "g"), "")
-            ?.replaceAll(new RegExp(summarizeRegex, "g"), "");
+            ?.replaceAll(new RegExp(summarizeRegex, "g"), "")
+            ?.replaceAll(new RegExp(gifRegex, "g"), "");
 
             let contents = [
                 {
@@ -159,6 +163,10 @@ module.exports = {
                 context += `\n\n-----\n\nRecent polls in this channel (most recent poll is at the bottom of the list)\n`;
                 for(let [_, p] of polls) context += pollString(p);
             }
+            for(let gifName in gifs){
+                gifList += `- {{GIF::${gifName}}} ${gifs[gifName].description}\n`;
+            }
+            systemPromptFooter = gifList + systemPromptFooter;
             
             //API key selection
             const selectedKey = 1;
@@ -220,6 +228,7 @@ module.exports = {
             let status = responseText.match(setStatusRegex)?.[1]?.slice(0, 128);
             let bannerDesc = responseText.match(setBannerRegex)?.[1]?.slice(0, 128);
             let summary = responseText.match(summarizeRegex)?.[1]?.slice(0, 512);
+            let gif = responseText.match(gifRegex)?.[1]?.slice(0, 512);
 
             //execute status command
             if(status && message.guild){
@@ -257,6 +266,17 @@ module.exports = {
                 }
             }
 
+            //execute gif command
+            let embeds = [];
+            if(gif){
+                if(gifs[gif]){
+                    let embed = new EmbedBuilder()
+                    .setColor(process.env.DEFAULT_COLOR)
+                    .setImage(gifs[gif].url);
+                    embeds.push(embed);
+                }
+            }
+
             //add summary of request to request history
             if(summary){
                 let currentSummaries = message.client.aiContext.summaries.get(message.guild ? message.guild.id : message.author.id) ?? [];
@@ -269,6 +289,7 @@ module.exports = {
             responseText = responseText
             ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
             ?.replaceAll(new RegExp(setBannerRegex, "g"), "")
+            ?.replaceAll(new RegExp(gifRegex, "g"), "")
             ?.replaceAll(new RegExp(summarizeRegex, "g"), "");
 
             responseText = responseText.trim();
@@ -295,17 +316,21 @@ module.exports = {
 
             //split response into multiple messages and send
             const chunks = splitMarkdownMessage(responseText)?.filter(Boolean);
+            let allowedMentions = {users: [message.author.id], roles: []};
             let msg;
 
             if(message.guild){
+                if(chunks.length === 1) return message.channel.send({content: chunks[0]?.slice(0, 2000), files: responseFile, embeds, allowedMentions});
                 for(let x = 0; x < chunks.length; x++){
-                    if(x === 0) msg = await message.channel.send({content: chunks[0]?.slice(0, 2000), files: responseFile, allowedMentions: {users: [message.author.id], roles: []}});
-                    else msg = await msg?.reply({content: chunks[x]?.slice(0, 2000), allowedMentions: {users: [message.author.id], roles: []}});
+                    if(x === 0) msg = await message.channel.send({content: chunks[0]?.slice(0, 2000), files: responseFile, allowedMentions});
+                    else if(x === chunks.length - 1) await msg?.reply({content: chunks[x]?.slice(0, 2000), embeds, allowedMentions});
+                    else msg = await msg?.reply({content: chunks[x]?.slice(0, 2000), allowedMentions});
                 }
             }
             else {
+                if(chunks.length === 1) return message.author.send({content: chunks[0]?.slice(0, 2000), files: responseFile, embeds, allowedMentions});
                 for(let x = 0; x < chunks.length; x++){
-                    await message.author.send({content: chunks[x]?.slice(0, 2000), files: responseFile, allowedMentions: {users: [message.author.id], roles: []}});
+                    await message.author.send({content: chunks[x]?.slice(0, 2000), files: responseFile, allowedMentions});
                 }
             }
         } catch (err) {
