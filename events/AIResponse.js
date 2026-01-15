@@ -8,6 +8,7 @@ const setStatusRegex = /\{\{SetStatus::(.+?)\}\}/;
 const setBannerRegex = /\{\{SetBanner::(.+?)\}\}/;
 const summarizeRegex = /\{\{Summarize::(.+?)\}\}/;
 const gifRegex = /\{\{GIF::(.+?)\}\}/;
+const reactRegex = /\{\{React::(.+?)\}\}/;
 
 const gifs = require("../assets/gifs.json");
 
@@ -44,7 +45,8 @@ module.exports = {
             ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
             ?.replaceAll(new RegExp(setBannerRegex, "g"), "")
             ?.replaceAll(new RegExp(summarizeRegex, "g"), "")
-            ?.replaceAll(new RegExp(gifRegex, "g"), "");
+            ?.replaceAll(new RegExp(gifRegex, "g"), "")
+            ?.replaceAll(new RegExp(reactRegex, "g"), "");
 
             let contents = [
                 {
@@ -230,6 +232,7 @@ module.exports = {
             let bannerDesc = responseText.match(setBannerRegex)?.[1]?.slice(0, 128);
             let summary = responseText.match(summarizeRegex)?.[1]?.slice(0, 512);
             let gif = responseText.match(gifRegex)?.[1]?.slice(0, 512);
+            let react = responseText.match(reactRegex)?.[1]?.slice(0, 128);
 
             //execute status command
             if(status && message.guild){
@@ -278,6 +281,11 @@ module.exports = {
                 }
             }
 
+            //execute react command
+            if(react){
+                message.react(react).catch(()=>{});
+            }
+
             //add summary of request to request history
             if(summary){
                 let currentSummaries = message.client.aiContext.summaries.get(message.guild ? message.guild.id : message.author.id) ?? [];
@@ -291,7 +299,8 @@ module.exports = {
             ?.replaceAll(new RegExp(setStatusRegex, "g"), "")
             ?.replaceAll(new RegExp(setBannerRegex, "g"), "")
             ?.replaceAll(new RegExp(gifRegex, "g"), "")
-            ?.replaceAll(new RegExp(summarizeRegex, "g"), "");
+            ?.replaceAll(new RegExp(summarizeRegex, "g"), "")
+            ?.replaceAll(new RegExp(reactRegex, "g"), "");
 
             responseText = responseText.trim();
 
