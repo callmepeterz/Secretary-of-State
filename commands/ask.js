@@ -37,10 +37,7 @@ module.exports = {
         .setDescription("Specify which model to use, default is Gemini 3 Flash")
         .setRequired(false)
         .addChoices(
-            {name: "Gemini 3 Flash", value: "gemini-3-flash-preview"},
-            {name: "Gemini 3 Pro", value: "gemini-3-pro-preview"},
             {name: "Gemini 2.5 Flash", value: "gemini-2.5-flash"},
-            {name: "Gemini 2.5 Pro", value: "gemini-2.5-pro"},
         )
     )
     .addNumberOption(
@@ -50,16 +47,6 @@ module.exports = {
         .setRequired(false)
         .setMinValue(0)
         .setMaxValue(2)
-    )
-    .addStringOption(
-        new SlashCommandStringOption()
-        .setName("thinking_level")
-        .setDescription("Pick the thinking level for the AI, default is 'High'")
-        .setRequired(false)
-        .addChoices(
-            {name: "High", value: "high"},
-            {name: "Low", value: "low"},
-        )
     )
     .addIntegerOption(
         new SlashCommandIntegerOption()
@@ -244,16 +231,12 @@ module.exports = {
         ];
 
         const response = await aiInstance.models.generateContent({
-            model: interaction.options.getString("model") ?? "gemini-3-flash-preview",
+            model: interaction.options.getString("model") ?? "gemini-2.5-flash",
             contents,
             config: {
                 systemInstruction: systemInstruction + systemPromptFooter,
                 temperature:interaction.options.getNumber("temperature") ?? 1,
                 safetySettings,
-                thinkingConfig: {
-                    thinkingLevel: interaction.options.getString("thinking_level") ?? "high",
-                    includeThoughts: false,
-                },
                 tools: [
                     { googleSearch: {} },
                     { urlContext: {} }
