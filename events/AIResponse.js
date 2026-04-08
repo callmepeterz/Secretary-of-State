@@ -204,7 +204,7 @@ module.exports = {
             ];
 
             const response = await aiInstance.models.generateContent({
-                model: "gemini-3-flash-preview",
+                model: "gemini-3.1-flash-lite-preview",
                 contents,
                 config: {
                     systemInstruction: systemInstruction + systemPromptFooter,

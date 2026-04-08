@@ -37,10 +37,9 @@ module.exports = {
         .setDescription("Specify which model to use, default is Gemini 3 Flash")
         .setRequired(false)
         .addChoices(
-            {name: "Gemini 3 Flash", value: "gemini-3-flash-preview"},
-            {name: "Gemini 3 Pro", value: "gemini-3-pro-preview"},
+            {name: "Gemini 3.1 Flash Lite", value: "gemini-3.1-flash-lite-preview"},
+            {name: "Gemini 3.0 Flash", value: "gemini-3-flash"},
             {name: "Gemini 2.5 Flash", value: "gemini-2.5-flash"},
-            {name: "Gemini 2.5 Pro", value: "gemini-2.5-pro"},
         )
     )
     .addNumberOption(
@@ -244,7 +243,7 @@ module.exports = {
         ];
 
         const response = await aiInstance.models.generateContent({
-            model: interaction.options.getString("model") ?? "gemini-3-flash-preview",
+            model: interaction.options.getString("model") ?? "gemini-3.1-flash-lite-preview",
             contents,
             config: {
                 systemInstruction: systemInstruction + systemPromptFooter,
