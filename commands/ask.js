@@ -38,7 +38,7 @@ module.exports = {
         .setRequired(false)
         .addChoices(
             {name: "Gemini 3.1 Flash Lite", value: "gemini-3.1-flash-lite-preview"},
-            {name: "Gemini 3.0 Flash", value: "gemini-3-flash"},
+            {name: "Gemini 3.0 Flash", value: "gemini-3-flash-preview"},
             {name: "Gemini 2.5 Flash", value: "gemini-2.5-flash"},
         )
     )
