@@ -204,12 +204,16 @@ module.exports = {
             ];
 
             const response = await aiInstance.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: "gemini-3-flash-preview",
                 contents,
                 config: {
                     systemInstruction: systemInstruction + systemPromptFooter,
                     temperature: 1,
                     safetySettings,
+                    thinkingConfig: {
+                        thinkingLevel: "high",
+                        includeThoughts: false,
+                    },
                     tools: [
                         { googleSearch: {} },
                         { urlContext: {} }
