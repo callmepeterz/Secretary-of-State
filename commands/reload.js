@@ -17,6 +17,7 @@ module.exports = {
             {name: "Commands", value: "commands"},
             {name: "Event listener callbacks", value: "events"},
             {name: "User data", value: "userdata"},
+            {name: "Document data", value: "documentdata"},
             {name: "AI system instruction", value:"systeminstruction"},
         )
     ),
@@ -83,6 +84,16 @@ module.exports = {
                 }
                 console.log("Reloaded user data cache.");
                 interaction.reply({embeds: [embed.setDescription(`Reloaded user data cache.`)]});
+                break;
+
+            case "documentdata":
+                const docDataPath = path.join(process.cwd(), 'data/documents.json');
+                delete require.cache[require.resolve(docDataPath)];
+                const docData = require(docDataPath);
+                interaction.client.documents = docData;
+                
+                console.log("Reloaded document data cache.");
+                interaction.reply({embeds: [embed.setDescription(`Reloaded document data cache.`)]});
                 break;
 
             case "systeminstruction":
