@@ -6,7 +6,7 @@ const documentStatusExpString = ["Submission", "Expiry", "Rejection", "Revocatio
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("documents")
-    .setDescription("View and apply for state documents")
+    .setDescription("Access documents in the State Electronic Records")
     .setNSFW(false)
     .addSubcommand(
         new SlashCommandSubcommandBuilder()
