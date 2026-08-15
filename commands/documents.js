@@ -599,7 +599,7 @@ module.exports = {
 
             docembed
             .setTitle(doctype.en.slice(0, 256))
-            .setDescription(`${doctype.vi ? `*(${doctype.vi})*\n\n` : ""}**Document number:** \`${getDocumentNumber(document)}\`\n\n${doctype.description ?? ""}`.slice(0, 256) || null)
+            .setDescription(`${doctype.vi ? `*(${doctype.vi})*\n\n` : ""}**Document number:** \`${getDocumentNumber(document)}\`\n\n${doctype.description ?? ""}`.slice(0, 4000) || null)
             .addFields(...fields)
             .setFooter({text: "Retrieved"})
             .setTimestamp(Date.now());
