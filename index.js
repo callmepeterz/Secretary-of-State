@@ -42,6 +42,9 @@ client.games.chess = new Collection();
 // storing user data
 client.userData = {};
 
+// storing document data
+client.documents = {};
+
 // load commands
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file=>file.endsWith(".js"));
@@ -79,5 +82,9 @@ for (const file of userDataFiles) {
     const user = require(filePath);
     client.userData[user.id] = user;
 }
+
+// load document data
+const documentDataPath = path.join(__dirname, 'data/documents.json');
+client.documents = require(documentDataPath);
 
 client.login(process.env.TOKEN);
