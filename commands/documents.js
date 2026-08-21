@@ -286,6 +286,7 @@ module.exports = {
                 let application = {
                     type: dtype,
                     number: getNextDocNumber(dtype),
+                    random: Math.floor(Math.random() * 10000),
                     status: 0,
                     bearerId: interaction.user.id,
                     requestDate: Date.now(),
@@ -478,7 +479,7 @@ module.exports = {
             return isValid(document) && isSuspended(document);
         }
         function getDocumentNumber(document){
-            return `${getTypeInfo(document).symbol}${document.status === 0 || document.status === 2 ? "AP" : new Date(document.issuedDate).getFullYear().toString().slice(-2)}-${document.number.toString().padStart(4, "0")}`;
+            return `${getTypeInfo(document).symbol}${document.status === 0 || document.status === 2 ? "AP" : new Date(document.issuedDate).getFullYear().toString().slice(-2)}-${document.random.toString().padStart(4, "0")}-${document.number.toString().padStart(4, "0")}`;
         }
         function getNextDocNumber(doctype){
             let hnum = 0;
