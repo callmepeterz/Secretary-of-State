@@ -127,7 +127,7 @@ module.exports = {
             embed
             .setTitle("Limbus Company")
             .setAuthor({name: user.displayName, iconURL: user.avatarURL()})
-            .setDescription(`Friend code:\n\`\`\`\n${userData.limbus.code ?? "No friend code set"}\n\`\`\`\n${userData.limbus.chapter === -1 ? "" : userData.limbus.chapter === limbus.chapters.length - 1 ? `-# This user has completed the latest Canto/Intervallo` : `🛈 Spoiler advisory: This user has progressed up to **${limbus.chapters[userData.limbus.chapter]}**.`}`)
+            .setDescription(`Friend code:\n\`\`\`\n${userData.limbus.code ?? "No friend code set"}\n\`\`\`\n${userData.limbus.chapter === -1 ? "" : userData.limbus.chapter === limbus.chapters.length - 1 ? `-# This user has completed the latest Canto/Intervallo` : `🛈 Spoiler advisory: This user has progressed up to and completed **${limbus.chapters[userData.limbus.chapter]}**.`}`)
             interaction?.reply({embeds: [embed], flags: ephemeral ? [MessageFlags.Ephemeral] : []});
         }
 
