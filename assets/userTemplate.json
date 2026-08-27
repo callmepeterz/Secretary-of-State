@@ -6,5 +6,9 @@
         "bankId": null,
         "number": null,
         "name": null
+    },
+    "limbus": {
+        "code": null,
+        "chapter": -1
     }
 }
