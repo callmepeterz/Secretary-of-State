@@ -7,12 +7,12 @@ const limbus = require("../assets/limbus.json");
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("limbus")
-    .setDescription("User's Limbus Company (LCB) information")
+    .setDescription("User's Limbus Company (LC) information")
     .setNSFW(false)
     .addSubcommand(
         new SlashCommandSubcommandBuilder()
         .setName("show")
-        .setDescription("Displays a user's Limbus Company (LCB) information")
+        .setDescription("Displays a user's Limbus Company (LC) information")
         .addUserOption(
             new SlashCommandUserOption()
             .setName("user")
