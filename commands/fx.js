@@ -1,5 +1,7 @@
-const { SlashCommandBuilder, SlashCommandStringOption, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, MessageFlags } = require('discord.js');
-const urlRegex = /^https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\//i;
+const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandBooleanOption, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, MessageFlags } = require('discord.js');
+const twitterUrlRegex = /^https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\//i;
+const instagramUrlRegex = /^https?:\/\/(?:www\.)?(?:instagram\.com|x\.com)\//i;
+
 const fxDomains = [
     "fxtwitter.com",
     "girlcockx.com",
@@ -11,13 +13,19 @@ const fxDomains = [
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("fx")
-    .setDescription("Embeds Twitter/X videos")
+    .setDescription("Embeds Twitter/X or Instagram posts")
     .setNSFW(false)
     .addStringOption(
         new SlashCommandStringOption()
         .setName("url")
-        .setDescription("Twitter/X URL")
+        .setDescription("Twitter/X or Instagram URL")
         .setRequired(true)
+    )
+    .addBooleanOption(
+        new SlashCommandBooleanOption()
+        .setName("spoiler")
+        .setDescription("Mark this post as spoiler")
+        .setRequired(false)
     ),
     index: "",
     isDeferred: false,
@@ -31,8 +39,14 @@ module.exports = {
         let color = interaction.guild?.members?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let embed = new EmbedBuilder().setColor(color);
         let url = interaction.options.getString("url");
+        let spoiler = interaction.options.getBoolean("spoiler") ?? false;
 
-        if(!urlRegex.test(url)) return interaction.reply({embeds: [embed.setDescription("Invalid URL!")], flags: [MessageFlags.Ephemeral]});
-        interaction.reply(url.replace(urlRegex, `https://${fxDomains[Math.floor(Math.random() * fxDomains.length)]}/`));
+        if(twitterUrlRegex.test(url)) return interaction.reply(setSpoiler(url.replace(twitterUrlRegex, `https://${fxDomains[Math.floor(Math.random() * fxDomains.length)]}/`), spoiler));
+        if(instagramUrlRegex.test(url)) return interaction.reply(setSpoiler(url.replace(instagramUrlRegex, `https://oginstagram.com/`), spoiler));
+        interaction.reply({embeds: [embed.setDescription("Invalid URL!")], flags: [MessageFlags.Ephemeral]});
     },
 };
+
+function setSpoiler(text, spoiler){
+    return spoiler ? `||${text}||` : text;
+}
