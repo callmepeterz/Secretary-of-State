@@ -28,7 +28,7 @@ module.exports = {
         if(spoilerRegex.test(message.content)) urlList = `||${urlList}||`;
 
         message.reply({content: urlList.slice(0, 2000), allowedMentions: {users: [], roles: []}})
-        .then(m => m?.suppressEmbeds().catch(() => {}))
+        .then(() => message?.suppressEmbeds().catch(() => {}))
         .catch(() => {});
     },
 };
