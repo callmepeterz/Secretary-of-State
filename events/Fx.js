@@ -23,7 +23,7 @@ module.exports = {
         message.content?.match(instagramRegex)?.forEach(v => urlList += v.replace(instagramRegex, `$<prefix>oginstagram.com$<suffix>`) + "\n");
         if(!urlList.length) return;
         if(spoilerRegex.test(message.content)) urlList = `||${urlList}||`;
-        message.suppressEmbeds();
-        message.reply({content: urlList.slice(0, 2000), allowedMentions: {users: [], roles: []}});
+        message.suppressEmbeds().catch(() => {});
+        message.reply({content: urlList.slice(0, 2000), allowedMentions: {users: [], roles: []}}).catch(() => {});
     },
 };
