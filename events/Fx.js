@@ -20,10 +20,12 @@ module.exports = {
      * @param {Message} message 
      */
     async execute(message){
+        if(!message.content || message.author.bot) return;
+        
         let urlList = "";
-        message.content?.match(twitterRegex)?.forEach(v => urlList += v.replace(twitterRegex, `$<prefix>${fxDomains[Math.floor(Math.random() * fxDomains.length)]}$<suffix>`) + "\n");
-        message.content?.match(instagramRegex)?.forEach(v => urlList += v.replace(instagramRegex, `$<prefix>oginstagram.com$<suffix>`) + "\n");
-        message.content?.match(facebookRegex)?.forEach(v => urlList += v.replace(facebookRegex, `$<prefix>facebed.com$<suffix>`) + "\n");
+        message.content.match(twitterRegex)?.forEach(v => urlList += v.replace(twitterRegex, `$<prefix>${fxDomains[Math.floor(Math.random() * fxDomains.length)]}$<suffix>`) + "\n");
+        message.content.match(instagramRegex)?.forEach(v => urlList += v.replace(instagramRegex, `$<prefix>oginstagram.com$<suffix>`) + "\n");
+        message.content.match(facebookRegex)?.forEach(v => urlList += v.replace(facebookRegex, `$<prefix>facebed.com$<suffix>`) + "\n");
         if(!urlList.length) return;
         if(spoilerRegex.test(message.content)) urlList = `||${urlList}||`;
 
