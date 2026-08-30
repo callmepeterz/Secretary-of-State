@@ -26,7 +26,9 @@ module.exports = {
         message.content?.match(facebookRegex)?.forEach(v => urlList += v.replace(facebookRegex, `$<prefix>facebed.com$<suffix>`) + "\n");
         if(!urlList.length) return;
         if(spoilerRegex.test(message.content)) urlList = `||${urlList}||`;
-        message.suppressEmbeds().catch(() => {});
-        message.reply({content: urlList.slice(0, 2000), allowedMentions: {users: [], roles: []}}).catch(() => {});
+
+        message.reply({content: urlList.slice(0, 2000), allowedMentions: {users: [], roles: []}})
+        .then(m => m?.suppressEmbeds().catch(() => {}))
+        .catch(() => {});
     },
 };
