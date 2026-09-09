@@ -25,7 +25,7 @@ module.exports = {
     async execute(message, attempt = 0){
         attempt ++;
         try {
-            if(!message.mentions.has(message.client.user.id) || !message.content || message.author.bot) return;
+            if(!message.content || !(message.content?.includes(`<@${message.client.user.id}>`) || message.content?.includes(`<@!${message.client.user.id}>`)) || message.author.bot) return;
             if(attempt === 1 && Date.now() - message.client.aiContext.lastCalled[message.author.id] < 10000){
                 let msg = await message.channel.send(`<@${message.author.id}> You are on a cooldown, try again in <t:${Math.round((message.client.aiContext.lastCalled[message.author.id] + 15000) / 1000)}:R>`).catch(()=>{});
                 if(msg) setTimeout(()=>msg.delete().catch(()=>{}), 3000);
