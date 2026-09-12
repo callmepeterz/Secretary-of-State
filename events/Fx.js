@@ -3,11 +3,11 @@ const spoilerRegex = /\|\|([^\|]+)\|\|/;
 
 const fxList = [
     {
-        regex: /(?<prefix>https?:\/\/(?:www\.)?)(?<domain>twitter\.com|x\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
+        regex: /(?<prefix>https?:\/\/)(?:www\.)?(?<domain>twitter\.com|x\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
         domains: ["fxtwitter.com", "girlcockx.com", "hotyurisex.com", "yaoisex.com", "boypussyx.com"]
     },
     {
-        regex: /(?<prefix>https?:\/\/(?:www\.)?)(?<domain>instagram\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
+        regex: /(?<prefix>https?:\/\/)(?:www\.)?(?<domain>instagram\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
         domains: ["oginstagram.com"]
     },
     {
