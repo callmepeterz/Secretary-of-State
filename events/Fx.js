@@ -17,8 +17,12 @@ const fxList = [
     {
         regex: /(?<prefix>https?:\/\/(?:www\.)?(?:vt\.)?)(?<domain>tiktok\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
         domains: ["tnktok.com"]
-    }
-]
+    },
+    {
+        regex: /(?<prefix>https?:\/\/(?:www\.)?)(?<domain>youtube\.com)(?<suffix>\/shorts(?:\/[^\s\|]*)*)/gmi,
+        domains: ["koutube.com"]
+    },
+];
 
 
 module.exports = {
