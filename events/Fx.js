@@ -1,5 +1,5 @@
 const { Events, Message } = require('discord.js');
-const spoilerRegex = /\|\|([^|]+)\|\|/;
+const spoilerRegex = /\|\|([^\|]+)\|\|/;
 
 const fxList = [
     {
@@ -21,6 +21,10 @@ const fxList = [
     {
         regex: /(?<prefix>https?:\/\/(?:www\.)?)(?<domain>youtube\.com)(?<suffix>\/shorts(?:\/[^\s\|]*)*)/gmi,
         domains: ["koutube.com"]
+    },
+    {
+        regex: /(?<prefix>https?:\/\/)(?:www\.)?(?<domain>threads\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
+        domains: ["fixthreads.seria.moe"]
     },
 ];
 
