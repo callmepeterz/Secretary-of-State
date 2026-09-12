@@ -12,7 +12,7 @@ const fxList = [
     },
     {
         regex: /(?<prefix>https?:\/\/)(?:www\.)?(?<domain>facebook\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
-        domains: ["facebed.seria.moe"]
+        domains: ["facebed.com"]
     },
     {
         regex: /(?<prefix>https?:\/\/(?:www\.)?(?:vt\.)?)(?<domain>tiktok\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
