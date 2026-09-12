@@ -7,15 +7,15 @@ const fxList = [
         domains: ["fxtwitter.com", "girlcockx.com", "hotyurisex.com", "yaoisex.com", "boypussyx.com"]
     },
     {
-        regex: /(?<prefix>https?:\/\/(?:www\.)?)(?<domain>instagram.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
+        regex: /(?<prefix>https?:\/\/(?:www\.)?)(?<domain>instagram\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
         domains: ["oginstagram.com"]
     },
     {
-        regex: /(?<prefix>https?:\/\/(?:www\.)?)(?<domain>facebook.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
+        regex: /(?<prefix>https?:\/\/(?:www\.)?)(?<domain>facebook\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
         domains: ["facebed.com"]
     },
     {
-        regex: /(?<prefix>https?:\/\/(?:www\.)?(?:vt\.)?)(?<domain>tiktok.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
+        regex: /(?<prefix>https?:\/\/(?:www\.)?(?:vt\.)?)(?<domain>tiktok\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
         domains: ["tnktok.com"]
     }
 ]
