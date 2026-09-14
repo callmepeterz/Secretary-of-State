@@ -1,4 +1,4 @@
-const { Events, Message } = require('discord.js');
+const { Events, Message, MessageFlags } = require('discord.js');
 const spoilerRegex = /\|\|([^\|]+)\|\|/;
 
 const fxList = require("../assets/fxList.js");
@@ -22,7 +22,7 @@ module.exports = {
         if(!urlList.length) return;
         if(spoilerRegex.test(message.content)) urlList = `||${urlList}||`;
 
-        message.reply({content: urlList.slice(0, 2000), allowedMentions: {users: [], roles: []}})
+        message.reply({content: urlList.slice(0, 2000), allowedMentions: {users: [], roles: []}, flags: [MessageFlags.SuppressNotifications]})
         .then(() => message?.suppressEmbeds().catch(() => {}))
         .catch(() => {});
     },
