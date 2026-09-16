@@ -106,6 +106,7 @@ module.exports = {
             case "limbus":
                 const limbusDataPath = path.join(process.cwd(), 'assets/limbus.json');
                 delete require.cache[require.resolve(limbusDataPath)];
+                require(limbusDataPath);
                 
                 console.log("Reloaded Limbus Company data cache.");
                 interaction.reply({embeds: [embed.setDescription(`Reloaded Limbus Company data cache.`)]});
