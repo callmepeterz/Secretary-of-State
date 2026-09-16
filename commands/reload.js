@@ -103,7 +103,7 @@ module.exports = {
                 console.log("Reloaded system instruction.");
                 interaction.reply({embeds: [embed.setDescription(`Reloaded system instruction.`)]});
                 break;
-            case "documentdata":
+            case "limbus":
                 const limbusDataPath = path.join(process.cwd(), 'assets/limbus.json');
                 delete require.cache[require.resolve(limbusDataPath)];
                 
