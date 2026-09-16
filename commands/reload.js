@@ -18,7 +18,8 @@ module.exports = {
             {name: "Event listener callbacks", value: "events"},
             {name: "User data", value: "userdata"},
             {name: "Document data", value: "documentdata"},
-            {name: "AI system instruction", value:"systeminstruction"},
+            {name: "AI system instruction", value: "systeminstruction"},
+            {name: "Limbus Company data", value: "limbus"},
         )
     ),
     index: "",
@@ -101,6 +102,13 @@ module.exports = {
                 interaction.client.aiContext.systemInstruction = fs.readFileSync(systemInstructionPath, "utf-8").toString();
                 console.log("Reloaded system instruction.");
                 interaction.reply({embeds: [embed.setDescription(`Reloaded system instruction.`)]});
+                break;
+            case "documentdata":
+                const limbusDataPath = path.join(process.cwd(), 'assets/limbus.json');
+                delete require.cache[require.resolve(limbusDataPath)];
+                
+                console.log("Reloaded Limbus Company data cache.");
+                interaction.reply({embeds: [embed.setDescription(`Reloaded Limbus Company data cache.`)]});
                 break;
         }
     },
