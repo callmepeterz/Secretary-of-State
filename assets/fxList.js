@@ -1,7 +1,7 @@
 module.exports = [
     {
         regex: /(?<prefix>https?:\/\/)(?:www\.)?(?<domain>twitter\.com|x\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
-        domains: ["fxtwitter.com", "girlcockx.com", "hotyurisex.com", "yaoisex.com", "boypussyx.com"]
+        domains: ["fxtwitter.com", "girlcockx.com", "hotyurisex.com", "yaoisex.com", "boypussyx.com", "mpregx.com", "faggotx.com"]
     },
     {
         regex: /(?<prefix>https?:\/\/)(?:www\.)?(?<domain>instagram\.com)(?<suffix>(?:\/[^\s\|]*)*)/gmi,
