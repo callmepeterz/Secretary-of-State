@@ -20,6 +20,7 @@ module.exports = {
             {name: "Document data", value: "documentdata"},
             {name: "AI system instruction", value: "systeminstruction"},
             {name: "Limbus Company data", value: "limbus"},
+            {name: "Fx data", value: "fx"},
         )
     ),
     index: "",
@@ -37,37 +38,21 @@ module.exports = {
 
         switch(interaction.options.getString("component")){
             case "commands":
-                const commandsPath = path.join(process.cwd(), 'commands');
                 const commandFiles = fs.readdirSync(commandsPath).filter(file=>file.endsWith(".js"));
 
                 for (const file of commandFiles) {
-                    const filePath = path.join(commandsPath, file);
-                    delete require.cache[require.resolve(filePath)];
-                    const command = require(filePath);
-                    if ('data' in command && 'execute' in command) {
-                        interaction.client.commands.set(command.data.name, command);
-                    } else {
-                        console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
-                    }
+                    reloadCommand(file);
                 }
                 console.log(`Reloaded ${commandFiles.length} command(s).`);
                 interaction.reply({embeds: [embed.setDescription(`Reloaded ${commandFiles.length} command(s).`)]});
                 break;
 
             case "events":
-                const eventsPath = path.join(process.cwd(), 'events');
                 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
                 interaction.client.removeAllListeners();
                 for (const file of eventFiles) {
-                    const filePath = path.join(eventsPath, file);
-                    delete require.cache[require.resolve(filePath)];
-                    const event = require(filePath);
-                    if (event.once) {
-                        interaction.client.once(event.name, (...args) => event.execute(...args));
-                    } else {
-                        interaction.client.on(event.name, (...args) => event.execute(...args));
-                    }
+                    reloadEvent(file);
                 }
                 console.log(`Reloaded ${eventFiles.length} event(s).`);
                 interaction.reply({embeds: [embed.setDescription(`Reloaded ${eventFiles.length} event(s).`)]});
@@ -107,15 +92,48 @@ module.exports = {
                 const limbusDataPath = path.join(process.cwd(), 'assets/limbus.json');
                 delete require.cache[require.resolve(limbusDataPath)];
 
-                const limbusCmdPath = path.join(process.cwd(), 'commands/limbus.js');
-                delete require.cache[require.resolve(limbusCmdPath)];
-
-                const limbusCommand = require(limbusCmdPath);
-                interaction.client.commands.set(limbusCommand.data.name, limbusCommand);
+                reloadCommand("limbus.js");
                 
                 console.log("Reloaded Limbus Company data cache.");
                 interaction.reply({embeds: [embed.setDescription(`Reloaded Limbus Company data cache.`)]});
                 break;
+
+            case "fx":
+                const fxDataPath = path.join(process.cwd(), 'assets/fxList.js');
+                delete require.cache[require.resolve(fxDataPath)];
+
+                reloadCommand("fx.js");
+                reloadEvent("Fx.js");
+                reloadEvent("FxMessageDelete.js");
+                
+                console.log("Reloaded Fx data cache.");
+                interaction.reply({embeds: [embed.setDescription(`Reloaded Limbus Company data cache.`)]});
+                break;
+        }
+
+        function reloadCommand(file){
+            const commandsPath = path.join(process.cwd(), 'commands');
+            const filePath = path.join(commandsPath, file);
+            delete require.cache[require.resolve(filePath)];
+            const command = require(filePath);
+            if ('data' in command && 'execute' in command) {
+                interaction.client.commands.set(command.data.name, command);
+            } else {
+                console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+            }
+        }
+
+        function reloadEvent(file){
+            const eventsPath = path.join(process.cwd(), 'events');
+            const filePath = path.join(eventsPath, file);
+            delete require.cache[require.resolve(filePath)];
+            const event = require(filePath);
+            if (event.once) {
+                interaction.client.once(event.name, (...args) => event.execute(...args));
+            }
+            else {
+                interaction.client.on(event.name, (...args) => event.execute(...args));
+            }
         }
     },
 };
