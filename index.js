@@ -1,5 +1,5 @@
 "use strict";
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 const {Client, Collection, Partials} = require('discord.js');
 const fs = require("node:fs");
 const path = require("node:path");
