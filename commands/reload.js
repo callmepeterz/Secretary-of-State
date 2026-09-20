@@ -128,6 +128,8 @@ module.exports = {
             const filePath = path.join(eventsPath, file);
             delete require.cache[require.resolve(filePath)];
             const event = require(filePath);
+
+            interaction.client.removeListener(event.name);
             if (event.once) {
                 interaction.client.once(event.name, (...args) => event.execute(...args));
             }
