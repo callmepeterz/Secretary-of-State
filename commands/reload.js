@@ -41,24 +41,15 @@ module.exports = {
 
         switch(interaction.options.getString("component")){
             case "commands":
-                const commandFiles = fs.readdirSync(commandsPath).filter(file=>file.endsWith(".js"));
-
-                for (const file of commandFiles) {
-                    reloadCommand(file);
-                }
-                console.log(`Reloaded ${commandFiles.length} command(s).`);
-                interaction.reply({embeds: [embed.setDescription(`Reloaded ${commandFiles.length} command(s).`)]});
+                let commands = reloadCommands();
+                console.log(`Reloaded ${commands} command(s).`);
+                interaction.reply({embeds: [embed.setDescription(`Reloaded ${commands} command(s).`)]});
                 break;
 
             case "events":
-                const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
-
-                interaction.client.removeAllListeners();
-                for (const file of eventFiles) {
-                    reloadEvent(file);
-                }
-                console.log(`Reloaded ${eventFiles.length} event(s).`);
-                interaction.reply({embeds: [embed.setDescription(`Reloaded ${eventFiles.length} event(s).`)]});
+                let events = reloadEvents();
+                console.log(`Reloaded ${events} event(s).`);
+                interaction.reply({embeds: [embed.setDescription(`Reloaded ${events} event(s).`)]});
                 break;
 
             case "userdata":
@@ -94,9 +85,7 @@ module.exports = {
             case "limbus":
                 const limbusDataPath = path.join(process.cwd(), 'assets/limbus.json');
                 delete require.cache[require.resolve(limbusDataPath)];
-
-                reloadCommand("limbus.js");
-                
+                reloadCommands();
                 console.log("Reloaded Limbus Company data cache.");
                 interaction.reply({embeds: [embed.setDescription(`Reloaded Limbus Company data cache.`)]});
                 break;
@@ -104,39 +93,47 @@ module.exports = {
             case "fx":
                 const fxDataPath = path.join(process.cwd(), 'assets/fxList.js');
                 delete require.cache[require.resolve(fxDataPath)];
-
-                reloadCommand("fx.js");
-                reloadEvent("Fx.js");
-                reloadEvent("FxMessageDelete.js");
-                
+                reloadCommands();
+                reloadEvents();
                 console.log("Reloaded Fx data cache.");
-                interaction.reply({embeds: [embed.setDescription(`Reloaded Limbus Company data cache.`)]});
+                interaction.reply({embeds: [embed.setDescription(`Reloaded Fx data cache.`)]});
                 break;
         }
 
-        function reloadCommand(file){
-            const filePath = path.join(commandsPath, file);
-            delete require.cache[require.resolve(filePath)];
-            const command = require(filePath);
-            if ('data' in command && 'execute' in command) {
-                interaction.client.commands.set(command.data.name, command);
-            } else {
-                console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+        function reloadCommands(){
+            const commandFiles = fs.readdirSync(commandsPath).filter(file=>file.endsWith(".js"));
+            for (const file of commandFiles) {
+                const filePath = path.join(commandsPath, file);
+                delete require.cache[require.resolve(filePath)];
+                const command = require(filePath);
+                if ('data' in command && 'execute' in command) {
+                    interaction.client.commands.set(command.data.name, command);
+                } else {
+                    console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+                }
             }
+
+            return commandFiles.length;
         }
 
-        function reloadEvent(file){
-            const filePath = path.join(eventsPath, file);
-            delete require.cache[require.resolve(filePath)];
-            const event = require(filePath);
+        function reloadEvents(){
+            const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+            interaction.client.removeAllListeners();
+            for (const file of eventFiles) {
+                const filePath = path.join(eventsPath, file);
+                delete require.cache[require.resolve(filePath)];
+                const event = require(filePath);
 
-            interaction.client.removeListener(event.name);
-            if (event.once) {
-                interaction.client.once(event.name, (...args) => event.execute(...args));
+                interaction.client.removeListener(event.name);
+                if (event.once) {
+                    interaction.client.once(event.name, (...args) => event.execute(...args));
+                }
+                else {
+                    interaction.client.on(event.name, (...args) => event.execute(...args));
+                }
             }
-            else {
-                interaction.client.on(event.name, (...args) => event.execute(...args));
-            }
+
+            return eventFiles.length;
         }
     },
 };
