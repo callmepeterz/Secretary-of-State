@@ -2,6 +2,9 @@ const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandSubcommandBui
 const fs = require("node:fs");
 const path = require("node:path");
 
+const eventsPath = path.join(process.cwd(), 'events');
+const commandsPath = path.join(process.cwd(), 'commands');
+
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("reload")
@@ -112,7 +115,6 @@ module.exports = {
         }
 
         function reloadCommand(file){
-            const commandsPath = path.join(process.cwd(), 'commands');
             const filePath = path.join(commandsPath, file);
             delete require.cache[require.resolve(filePath)];
             const command = require(filePath);
@@ -124,7 +126,6 @@ module.exports = {
         }
 
         function reloadEvent(file){
-            const eventsPath = path.join(process.cwd(), 'events');
             const filePath = path.join(eventsPath, file);
             delete require.cache[require.resolve(filePath)];
             const event = require(filePath);
