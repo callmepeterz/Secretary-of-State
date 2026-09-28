@@ -26,7 +26,7 @@ module.exports = {
         attempt ++;
         try {
             if(message.flags.has(MessageFlags.SuppressNotifications) || !message.content || !message.mentions.has(message.client.user.id) || message.author.bot) return;
-            if(message.reference.type === MessageReferenceType.Default && message.reference.messageId){
+            if(message.reference && message.reference.type === MessageReferenceType.Default && message.reference.messageId){
                 let fetchedMessage = await message.fetchReference();
                 if(fetchedMessage && fetchedMessage.author.id === message.client.user.id && fetchedMessage.flags.has(MessageFlags.SuppressNotifications) && !(message.content?.includes(`<@${message.client.user.id}>`) || message.content?.includes(`<@!${message.client.user.id}>`))) return;
             }
