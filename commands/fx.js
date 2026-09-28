@@ -1,24 +1,15 @@
 const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandBooleanOption, ChatInputCommandInteraction, InteractionResponse, EmbedBuilder, MessageFlags } = require('discord.js');
-const twitterUrlRegex = /^https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\//i;
-const instagramUrlRegex = /^https?:\/\/(?:www\.)?(?:instagram\.com|x\.com)\//i;
-
-const fxDomains = [
-    "fxtwitter.com",
-    "girlcockx.com",
-    "hotyurisex.com",
-    "yaoisex.com",
-    "boypussyx.com"
-];
+const fxList = require("../assets/fxList.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("fx")
-    .setDescription("Embeds Twitter/X or Instagram posts")
+    .setDescription("Embeds social media posts")
     .setNSFW(false)
     .addStringOption(
         new SlashCommandStringOption()
         .setName("url")
-        .setDescription("Twitter/X or Instagram URL")
+        .setDescription("Post URL")
         .setRequired(true)
     )
     .addBooleanOption(
@@ -41,12 +32,20 @@ module.exports = {
         let url = interaction.options.getString("url");
         let spoiler = interaction.options.getBoolean("spoiler") ?? false;
 
-        if(twitterUrlRegex.test(url)) return interaction.reply(setSpoiler(url.replace(twitterUrlRegex, `https://${fxDomains[Math.floor(Math.random() * fxDomains.length)]}/`), spoiler));
-        if(instagramUrlRegex.test(url)) return interaction.reply(setSpoiler(url.replace(instagramUrlRegex, `https://oginstagram.com/`), spoiler));
-        interaction.reply({embeds: [embed.setDescription("Invalid URL!")], flags: [MessageFlags.Ephemeral]});
+        let fxURL = "";
+        for(let fx of fxList){
+            let fxregex = new RegExp(`^${fx.regex.source}$`, "i");
+            let match = fxregex.exec(url.trim());
+            if(match){
+                let {prefix, domain, suffix} = match.groups;
+                fxURL = prefix + fx.domains[Math.floor(Math.random() * fx.domains.length)] + suffix;
+                break;
+            }
+        }
+        
+        if(!fxURL) return interaction.reply({embeds: [embed.setDescription("Invalid/unsupported URL!")], flags: [MessageFlags.Ephemeral]});
+        if(spoiler) fxURL = `||${fxURL}||`;
+
+        interaction.reply(fxURL.slice(0, 2000));
     },
 };
-
-function setSpoiler(text, spoiler){
-    return spoiler ? `||${text}||` : text;
-}
