@@ -1,7 +1,8 @@
 const { Events, Message, MessageFlags } = require('discord.js');
+const { parse } = require("tldts");
 const spoilerRegex = /\|\|([^\|]+)\|\|/;
 
-const fxList = require("../assets/fxList.js");
+const { fxList, fxGlobalRemovedParams } = require("../assets/fxList.js");
 
 
 module.exports = {
@@ -15,8 +16,25 @@ module.exports = {
         if(!message.content || message.author.bot) return;
         
         let urlList = "";
-        fxList.forEach(fx => {
-            message.content.match(fx.regex)?.forEach(v => urlList += v.replace(fx.regex, `$<prefix>${fx.domains[Math.floor(Math.random() * fx.domains.length)]}$<suffix>`) + "\n");
+
+        extractURLs(message.content)?.forEach(extracted => {
+            let parsedHostname = parse(extracted.url.hostname);
+            let fxMatch = matchFx(extracted.url);
+            if(!fxMatch) return;
+
+            let newSubdomain = fxMatch.preservesWWW ? parsedHostname.subdomain : removeWWWSubdomain(parsedHostname.subdomain);
+            let newHostname = attachSubdomain(fxMatch.preservesSubdomains ? newSubdomain : "") + randomSelect(fxMatch.replacementDomains);
+            extracted.url.hostname = newHostname;
+
+            extracted.url.searchParams.forEach((_, param) => {
+                if(fxMatch.removedSearchParams.includes(param) ||
+                fxGlobalRemovedParams.params.includes(param) ||
+                fxGlobalRemovedParams.prefixes.some(prefix => param.startsWith(prefix)))
+                extracted.url.searchParams.delete(param);
+            });
+
+            if(extracted.url.href === extracted.text) return;
+            urlList += extracted.url.href + "\n";
         });
        
         if(!urlList.length) return;
@@ -27,3 +45,37 @@ module.exports = {
         .catch(() => {});
     },
 };
+
+/**
+ * @param {String} content 
+ */
+function extractURLs(content){
+    var reg_ex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/gi;
+    return content.match(reg_ex)
+    ?.filter(raw => URL.canParse(raw))
+    ?.map(raw => {
+        let url = new URL(raw);
+        return { url, text: url.href };
+    });
+}
+
+function matchFx(url){
+    let parsedHostname = parse(url.hostname);
+    return fxList.find(fx =>
+        fx.matchDomains.includes(parsedHostname.domain)
+        && (!fx.matchPaths.length || fx.matchPaths.some(path => url.pathname.startsWith(path)))
+    );
+}
+
+function removeWWWSubdomain(subdomain){
+    if(subdomain === "www") return "";
+    return subdomain.replace(/^www\./i, "");
+}
+
+function attachSubdomain(subdomain){
+    return subdomain ? subdomain + "." : "";
+}
+
+function randomSelect(array){
+    return array.length ? array[Math.floor(Math.random() * array.length)] : null;
+}
