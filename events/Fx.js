@@ -34,7 +34,7 @@ module.exports = {
             });
 
             if(extracted.url.href === extracted.text) return;
-            urlList += extracted.url.href + "\n";
+            urlList += (extracted.suppressEmbeds ? `<${extracted.url.href}>` : extracted.url.href) + "\n";
         });
        
         if(!urlList.length) return;
@@ -50,12 +50,12 @@ module.exports = {
  * @param {String} content 
  */
 function extractURLs(content){
-    var reg_ex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/gi;
+    var reg_ex = /<?(https?:\/\/[^\s<]+[^<.,:;"')\]\s])>?/gi;
     return content.match(reg_ex)
-    ?.filter(raw => URL.canParse(raw))
+    ?.filter(raw => URL.canParse(removeAngleBrackets(raw)))
     ?.map(raw => {
-        let url = new URL(raw);
-        return { url, text: url.href };
+        let url = new URL(removeAngleBrackets(raw));
+        return { url, text: url.href, suppressEmbeds: detectAngleBrackets(raw) };
     });
 }
 
@@ -65,6 +65,14 @@ function matchFx(url){
         fx.matchDomains.includes(parsedHostname.domain)
         && (!fx.matchPaths.length || fx.matchPaths.some(path => url.pathname.startsWith(path)))
     );
+}
+
+function removeAngleBrackets(url){
+    return url.replaceAll(/(<|>)/g, "");
+}
+
+function detectAngleBrackets(raw){
+    return /<.+>/.test(raw);
 }
 
 function removeWWWSubdomain(subdomain){
