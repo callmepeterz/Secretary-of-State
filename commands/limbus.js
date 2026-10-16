@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const userTemplate = require("../assets/userTemplate.json");
 const limbus = require("../assets/limbus.json");
+const dayMili = 86400000;
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -70,6 +71,11 @@ module.exports = {
             .setRequired(false)
             .setAutocomplete(true)
         )
+    )
+    .addSubcommand(
+        new SlashCommandSubcommandBuilder()
+        .setName("time")
+        .setDescription("Shows Limbus Company reset and update schedule")
     ),
     index: "Tool",
     isDeferred: false,
@@ -82,6 +88,7 @@ module.exports = {
     async execute(interaction, deferred){
         let color = interaction.guild?.members?.me?.displayHexColor || process.env.DEFAULT_COLOR;
         let embed = new EmbedBuilder().setColor(color);
+        let now = new Date();
 
         let user = interaction.options.getUser("user") || interaction.user;
         let code = interaction.options.getString("code") || null;
@@ -117,6 +124,8 @@ module.exports = {
                 if(code) userData.limbus.code = code === "0000000000" ? null : code;
                 showLimbus();
                 break;
+            case "time":
+                return showTime();
         }
 
         interaction.client.userData[user.id] = userData;
@@ -128,6 +137,45 @@ module.exports = {
             .setAuthor({name: user.displayName, iconURL: user.avatarURL()})
             .setDescription(`<@$1124352399570653185> friend code:\n\`\`\`\n${userData.limbus.code ?? "No friend code set"}\n\`\`\`\n${userData.limbus.chapter === -1 ? "" : userData.limbus.chapter === limbus.chapters.length - 1 ? `-# This user has completed the latest Canto/Intervallo` : `ⓘ Spoiler advisory: This user has progressed up to and completed **${limbus.chapters[userData.limbus.chapter]}**.`}`)
             interaction?.reply({embeds: [embed], flags: ephemeral ? [MessageFlags.Ephemeral] : []});
+        }
+
+        function showTime(){
+            embed
+            .setDescription(`**<@$1124352399570653185> Schedule**\n- **Daily reset:** <t:${getDailyReset()}:F>, <t:${getDailyReset()}:R>\n- **Weekly reset:** <t:${getWeeklyReset()}:F>, <t:${getWeeklyReset()}:R>\n- **Weekly update:** <t:${getWeeklyUpdate()}:F>, <t:${getWeeklyUpdate()}:R>`);
+            interaction?.reply({embeds: [embed]});
+        }
+
+        function getDailyReset(){
+            let time = new Date();
+            time.setUTCFullYear(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+            time.setUTCHours(21, 0, 0, 0);
+            
+            if(now.getUTCHours() >= 21) time.setTime(time.getTime() + dayMili);
+            return getDiscordTimestamp(time);
+        }
+
+        function getWeeklyReset(){
+            let time = new Date();
+            time.setUTCFullYear(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+            time.setUTCHours(21, 0, 0, 0);
+            
+            if(now.getUTCDay() < 3 || (now.getUTCDay() === 3 && now.getUTCHours() < 21)) time.setTime(time.getTime() + dayMili * (3 - now.getUTCDay()));
+            else if(now.getUTCDay() > 3 || (now.getUTCDay() === 3 && now.getUTCHours() >= 21)) time.setTime(time.getTime() + dayMili * (7 - now.getUTCDay() + 3));
+            return getDiscordTimestamp(time);
+        }
+
+        function getWeeklyUpdate(){
+            let time = new Date();
+            time.setUTCFullYear(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+            time.setUTCHours(3, 0, 0, 0);
+            
+            if(now.getUTCDay() < 4 || (now.getUTCDay() === 4 && now.getUTCHours() < 3)) time.setTime(time.getTime() + dayMili * (4 - now.getUTCDay()));
+            else if(now.getUTCDay() > 4 || (now.getUTCDay() === 4 && now.getUTCHours() >= 3)) time.setTime(time.getTime() + dayMili * (7 - now.getUTCDay() + 4));
+            return getDiscordTimestamp(time);
+        }
+
+        function getDiscordTimestamp(time){
+            return Math.round(time.getTime() / 1000);
         }
 
         function showError(e){
