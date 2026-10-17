@@ -1,6 +1,6 @@
 const { Events, Message, MessageFlags, ActionRowBuilder, ComponentType, ButtonStyle } = require('discord.js');
 const { fx } = require("../util/fx.js");
-const refreshButton = [
+const buttons = [
     new ActionRowBuilder({
         components: [
             {
@@ -38,7 +38,7 @@ module.exports = {
             content: urlList.slice(0, 2000),
             allowedMentions: {users: [], roles: []},
             flags: [MessageFlags.SuppressNotifications],
-            components: refreshButton
+            components: buttons
         })
         .then(() => message?.suppressEmbeds().catch(() => {}))
         .catch(() => {});
