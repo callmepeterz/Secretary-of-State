@@ -15,7 +15,7 @@ module.exports = {
             preservesSubdomains: false,
             preservesWWW: false,
             replacementDomains: ["oginstagram.com"],
-            removedSearchParams: ["obrf", "igshid", "igsh"]
+            removedSearchParams: ["obrf", "igshid", "igsh", "dlrf"]
         },
         {
             matchDomains: ["facebook.com"],
@@ -39,7 +39,7 @@ module.exports = {
             preservesSubdomains: false,
             preservesWWW: false,
             replacementDomains: ["koutube.com"],
-            removedSearchParams: ["si"]
+            removedSearchParams: ["si", "is"]
         },
         {
             matchDomains: ["youtube.com"],
