@@ -47,7 +47,7 @@ module.exports = {
             preservesSubdomains: true,
             preservesWWW: true,
             replacementDomains: ["youtube.com"],
-            removedSearchParams: ["si"]
+            removedSearchParams: ["si", "is"]
         },
         {
             matchDomains: ["youtu.be"],
@@ -55,7 +55,7 @@ module.exports = {
             preservesSubdomains: true,
             preservesWWW: true,
             replacementDomains: ["youtu.be"],
-            removedSearchParams: ["si"]
+            removedSearchParams: ["si", "is"]
         },
         {
             matchDomains: ["threads.com"],
