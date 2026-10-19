@@ -29,6 +29,7 @@ module.exports = {
             if(message.reference && message.reference.type === MessageReferenceType.Default && message.reference.messageId){
                 let fetchedMessage = await message.fetchReference();
                 if(fetchedMessage && fetchedMessage.author.id === message.client.user.id && fetchedMessage.flags.has(MessageFlags.SuppressNotifications) && !(message.content?.includes(`<@${message.client.user.id}>`) || message.content?.includes(`<@!${message.client.user.id}>`))) return;
+                if(fetchedMessage && fetchedMessage.author.id === message.client.user.id && !fetchedMessage.content && !(message.content?.includes(`<@${message.client.user.id}>`) || message.content?.includes(`<@!${message.client.user.id}>`))) return;
             }
             if(attempt === 1 && Date.now() - message.client.aiContext.lastCalled[message.author.id] < 10000){
                 let msg = await message.channel.send(`<@${message.author.id}> You are on a cooldown, try again in <t:${Math.round((message.client.aiContext.lastCalled[message.author.id] + 15000) / 1000)}:R>`).catch(()=>{});
