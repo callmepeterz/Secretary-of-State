@@ -92,7 +92,9 @@ module.exports = {
 
             case "fx":
                 const fxDataPath = path.join(process.cwd(), 'assets/fxList.js');
+                const fxUtilPath = path.join(process.cwd(), 'util/fx.js');
                 delete require.cache[require.resolve(fxDataPath)];
+                delete require.cache[require.resolve(fxUtilPath)];
                 reloadCommands();
                 reloadEvents();
                 console.log("Reloaded Fx data cache.");
