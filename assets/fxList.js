@@ -6,8 +6,7 @@ module.exports = {
             preservesSubdomains: false,
             preservesWWW: false,
             replacementDomains: ["fxtwitter.com", "girlcockx.com", "hotyurisex.com", "yaoisex.com", "boypussyx.com", "mpregx.com", "faggotx.com"],
-            removedSearchParams: ["s", "t", "twclid"],
-            
+            removedSearchParams: ["s", "t", "twclid", "a"],   
         },
         {
             matchDomains: ["instagram.com"],
