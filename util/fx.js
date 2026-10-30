@@ -20,7 +20,7 @@ function fx(text, reload = false){
         let newHostname = attachSubdomain(fxMatch.preservesSubdomains ? newSubdomain : "") + randomSelect(fxMatch.replacementDomains);
         extracted.url.hostname = newHostname;
 
-        extracted.url.searchParams.forEach((_, param) => {
+        [...extracted.url.searchParams.keys()].forEach(param => {
             if(fxMatch.removedSearchParams.includes(param) ||
             fxGlobalRemovedParams.params.includes(param) ||
             fxGlobalRemovedParams.prefixes.some(prefix => param.startsWith(prefix)))
