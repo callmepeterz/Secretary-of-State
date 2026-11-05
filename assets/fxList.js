@@ -14,7 +14,7 @@ module.exports = {
             preservesSubdomains: false,
             preservesWWW: false,
             replacementDomains: ["oginstagram.com"],
-            removedSearchParams: ["obrf", "igshid", "igsh", "dlrf", "rpxt", "xtok", "exln"]
+            removedSearchParams: ["obrf", "igshid", "igsh", "dlrf", "rpxt", "xtok", "exln", "psln"]
         },
         {
             matchDomains: ["facebook.com"],
