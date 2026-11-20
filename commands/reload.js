@@ -24,6 +24,7 @@ module.exports = {
             {name: "AI system instruction", value: "systeminstruction"},
             {name: "Limbus Company data", value: "limbus"},
             {name: "Fx data", value: "fx"},
+            {name: "Countdown data", value: "countdown"},
         )
     ),
     index: "",
@@ -99,6 +100,14 @@ module.exports = {
                 reloadEvents();
                 console.log("Reloaded Fx data cache.");
                 interaction.reply({embeds: [embed.setDescription(`Reloaded Fx data cache.`)]});
+                break;
+
+            case "countdown":
+                const countdownDataPath = path.join(process.cwd(), 'assets/countdown.js');
+                delete require.cache[require.resolve(countdownDataPath)];
+                reloadCommands();
+                console.log("Reloaded countdown data cache.");
+                interaction.reply({embeds: [embed.setDescription(`Reloaded countdown data cache.`)]});
                 break;
         }
 
